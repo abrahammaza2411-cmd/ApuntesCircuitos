@@ -48,6 +48,6 @@ El propósito general de esta unidad abarca el aprendizaje del hardware digital 
 
 * **[Semana 3](semana3.md)**
 
-* **[Semana 4](semana4.md)4**
+* **[Semana 4](semana4.md)**
 
 * **[Semana 5](semana5.md)**
