@@ -1,184 +1,350 @@
-### Apuntes Teórico-Prácticos: Semana 4 \- Diseño de Circuitos Combinacionales y Bloques Aritméticos
+# Semana 4: Diseño Combinacional y Bloques Aritméticos
 
-##### 1\. Introducción al Diseño Combinacional y Contexto de la Semana 4
+**Asignatura:** Diseño de Circuitos · **Unidad 1:** Análisis de Lógica Combinacional con Diseño Clásico
 
-En el marco de la Unidad 1 ("Análisis de Lógica Combinacional con Diseño Clásico") de la asignatura  **Diseño de Circuitos**  de la Carrera de Computación (UNL), la Semana 4 constituye el nexo fundamental entre la minimización algebraica abstracta y la síntesis estructural de hardware funcional. Tras haber formalizado los teoremas del álgebra de Boole, la generación de formas canónicas y la optimización visual mediante Mapas de Karnaugh, el programa académico evoluciona hacia la construcción de bloques funcionales de cómputo. Los objetivos estratégicos de esta etapa comprenden:
+---
 
-1. El dominio riguroso de la metodología estándar del diseño combinacional clásico.  
-2. La síntesis e implementación de sumadores binarios fundamentales (Medio Sumador /  *Half Adder*  y Sumador Completo /  *Full Adder* ).  
-3. El diseño de circuitos restadores y el aprovechamiento de la representación en complemento a dos.  
-4. La implementación de comparadores de magnitud binaria.
+## Objetivos de la semana
 
-Esta transición desde compuertas lógicas elementales (AND, OR, NOT, XOR, XNOR) hacia subsistemas aritméticos representa el puente de ingeniería crítico hacia las Unidades Aritmético Lógicas (ALU) en arquitecturas de procesadores digitales modernos. Sin la capacidad de estructurar bloques que ejecuten adición, sustracción y comparación a nivel de bit, resulta imposible materializar la ejecución de instrucciones de cómputo sobre sustratos semiconductores físicos. La correcta abstracción de estos bloques aritméticos requiere, de manera imperativa, la adopción de una metodología de síntesis sistemática.
+Al terminar esta semana se debe ser capaz de:
 
-##### 2\. Metodología Estándar del Procedimiento de Diseño Combinacional Clásico
+- Aplicar el procedimiento estándar de diseño combinacional, también para circuitos con **varias salidas**.
+- Diseñar e interpretar el **medio sumador** y el **sumador completo**, y encadenarlos en un sumador paralelo.
+- Implementar el **desbordamiento** (*overflow*) con compuertas.
+- Diseñar **restadores** y, sobre todo, un **sumador/restador** en complemento a dos.
+- Diseñar **comparadores de magnitud**.
+- Probar los circuitos en simulador y con chips TTL (práctica APE 04).
 
-El desarrollo de hardware digital en el nivel de integración combinacional exige abandonar de manera absoluta el ensamblaje intuitivo o empírico de redes lógicas. La aplicación de una metodología formal de ingeniería garantiza que la arquitectura sintetizada responda de forma estricta a la especificación funcional, optimizando el área física de silicio y reduciendo el retardo de propagación de las señales.  
-El procedimiento de diseño de circuitos combinacionales clásicos se estructura rigurosamente en  **cinco pasos secuenciales** :
+> **Conocimientos previos:** complemento a dos, regla de detección de overflow y compuertas XOR/XNOR (Semana 1); minitérminos y simplificación (Semana 2); Mapas de Karnaugh y uso de compuertas universales (Semana 3). Aquí solo se aplican.
 
-1. **Especificación del problema:**  Formulación verbal clara y sin ambigüedades de los requerimientos operacionales y funcionales del sistema digital a diseñar.  
-2. **Asignación de variables:**  Identificación cuantitativa y cualitativa de las  \$n\$  variables de entrada y las  \$m\$  variables de salida, asignando simbología alfanumérica formal a cada línea de señal.  
-3. **Tabla de Verdad:**  Construcción exhaustiva del mapeo de comportamiento de las  \$m\$  salidas para las  \$2^n\$  combinaciones binarias posibles de la entrada.  
-4. **Obtención y Simplificación de Funciones:**  Derivación de las funciones booleanas canónicas en Suma de Productos (SOP /  *Minterms* ) o Producto de Sumas (POS /  *Maxterms* ), seguida de su minimización formal mediante teoremas algebraicos o Mapas de Karnaugh.  
-5. **Esquema del Circuito:**  Trazado del esquema estructural optimizado utilizando la notación gráfica estandarizada de compuertas lógicas bajo la norma ANSI/IEEE.
+---
 
-\+-------------------------------------------------------+  
-\|  1\. Especificación del Problema                       \|  
-\|     (Formulación clara de requerimientos funcionales)   \|  
-\+---------------------------+---------------------------+  
-                            \|  
-                            v  
-\+---------------------------+---------------------------+  
-\|  2\. Asignación de Variables                           \|  
-\|     (Definición de n entradas y m salidas binarias)   \|  
-\+---------------------------+---------------------------+  
-                            \|  
-                            v  
-\+---------------------------+---------------------------+  
-\|  3\. Tabla de Verdad                                   \|  
-\|     (Mapeo exhaustivo de las 2^n combinaciones)       \|  
-\+---------------------------+---------------------------+  
-                            \|  
-                            v  
-\+---------------------------+---------------------------+  
-\|  4\. Obtención y Simplificación de Funciones           \|  
-\|     (SOP/POS canónicos \-\> Minimización Karnaugh/Boole) \|  
-\+---------------------------+---------------------------+  
-                            \|  
-                            v  
-\+---------------------------+---------------------------+  
-\|  5\. Esquema del Circuito                              \|  
-\|     (Diagrama lógico con símbolos normados ANSI/IEEE) \|  
-\+-------------------------------------------------------+
+## 1. Procedimiento de diseño combinacional
 
-La observancia estricta de esta metodología de cinco etapas maximiza el rendimiento físico de la red lógica. Al minimizar el número de literales y compuertas, se reduce directamente el número de etapas de transistores en cascada, lo que disminuye el tiempo de retardo de propagación ( \$t\_{pd}\$ ) de la señal, minimiza la disipación de potencia dinámica y previene riesgos lógicos ( *hazards* ) en las salidas. Esta estrategia metodológica encuentra su aplicación directa inmediata en la concepción de los circuitos de adición binaria.
+Un circuito **combinacional** es aquel cuyas salidas dependen **solo del valor actual de las entradas**. El diseño sigue cinco pasos:
 
-##### 3\. Bloques Lógicos Aritméticos Fundamentales: Sumadores (Half Adder y Full Adder) y Detección de Desbordamiento
+| Paso | Qué se hace |
+|---|---|
+| 1. Especificación | Describir con claridad y sin ambigüedad lo que debe hacer el circuito |
+| 2. Asignación de variables | Definir las $n$ entradas y las $m$ salidas, con nombre y significado de `0`/`1` |
+| 3. Tabla de verdad | Dar el valor de **cada salida** para las $2^n$ combinaciones de entrada |
+| 4. Funciones y simplificación | Escribir cada salida en SOP o POS y minimizarla (álgebra o K-Map) |
+| 5. Esquema | Dibujar el circuito con símbolos ANSI/IEEE |
 
-La suma binaria constituye la operación matemática nuclear sobre la cual se fundamenta la totalidad del procesamiento numérico en computadoras. Operaciones más complejas, como la sustracción, la multiplicación, la división y el cálculo de direcciones de memoria, se derivan del bloque sumador.
+**Si hay varias salidas** ($m > 1$), la tabla de verdad tiene una columna por salida y cada una se simplifica **por separado** (un K-Map por salida). Después se buscan términos comunes que se puedan **compartir** entre salidas para ahorrar compuertas.
 
-###### *El Medio Sumador ( Half Adder )*
+Menos literales y menos compuertas implican menos transistores en serie, menos consumo y menor **retardo de propagación** ($t_{pd}$), que es el tiempo que tarda un cambio en las entradas en reflejarse en la salida.
 
-El  **Medio Sumador**  es un circuito combinacional que realiza la adición de dos bits de entrada ( \$A\$  y  \$B\$ ), generando una suma parcial ( \$S\$ ) y un acarreo de salida ( \$C\_{out}\$ ). Este bloque no posee la capacidad de procesar un acarreo proveniente de una etapa previa.
+---
 
-* **Tabla de Verdad del Half Adder:**
+## 2. Sumadores
 
-\$A\$,\$B\$,\$S\$  (Suma),\$C\_{out}\$  (Acarreo)  
-0,0,0,0  
-0,1,1,0  
-1,0,1,0  
-1,1,0,1
+La suma es la operación base de la aritmética digital: la resta, la comparación y otras operaciones se construyen a partir de ella.
 
-* **Ecuaciones Booleanas Simplificadas:**   \$\$S \= A \\bar{B} \+ \\bar{A} B \= A \\oplus B\$\$   \$\$C\_{out} \= A \\cdot B\$\$
+### 2.1 Medio sumador (*Half Adder*, HA)
 
-La salida de suma ( \$S\$ ) corresponde al operador exclusivo  **XOR** , en tanto que el acarreo ( \$C\_{out}\$ ) se obtiene mediante el operador  **AND** .  
-            Medio Sumador (Half Adder)  
-             \+------------------+  
-    A \------\>\|                  \|-------\> S \= A ⊕ B  
-             \|    Half Adder    \|  
-    B \------\>\|                  \|-------\> Cout \= A · B  
-             \+------------------+
+Suma **dos bits** $A$ y $B$ y produce la **suma** $S$ y el **acarreo** $C_{out}$. No admite acarreo de una etapa anterior.
 
-###### *El Sumador Completo ( Full Adder )*
+*Paso 1 y 2:* entradas $A$, $B$; salidas $S$ (bit de suma) y $C_{out}$ (acarreo).
 
-El  **Sumador Completo**  resuelve la limitación estructural del Half Adder al integrar una tercera entrada binaria: el acarreo de entrada ( \$C\_{in}\$ ). Esta adición permite interconectar múltiples módulos en cascada para procesar operandos de arbitraria longitud en bits.
+*Paso 3, tabla de verdad* (es la suma binaria de la Semana 1):
 
-* **Tabla de Verdad del Full Adder:**
+| $A$ | $B$ | $S$ | $C_{out}$ |
+|---|---|---|---|
+| 0 | 0 | 0 | 0 |
+| 0 | 1 | 1 | 0 |
+| 1 | 0 | 1 | 0 |
+| 1 | 1 | 0 | 1 |
 
-\$A\$,\$B\$,\$C\_{in}\$,\$S\$  (Suma),\$C\_{out}\$  (Acarreo)  
-0,0,0,0,0  
-0,0,1,1,0  
-0,1,0,1,0  
-0,1,1,0,1  
-1,0,0,1,0  
-1,0,1,0,1  
-1,1,0,0,1  
-1,1,1,1,1
+*Paso 4, ecuaciones:*
 
-* **Ecuaciones Booleanas Deductivas:**   \$\$S \= A \\oplus B \\oplus C\_{in}\$\$   \$\$C\_{out} \= A \\cdot B \+ C\_{in} (A \\oplus B) \= A \\cdot B \+ A \\cdot C\_{in} \+ B \\cdot C\_{in}\$\$
+$$S = A'B + AB' = A \oplus B \qquad\qquad C_{out} = A \cdot B$$
 
-           Sumador Completo (Full Adder)  
-             \+------------------+  
-    A \------\>\|                  \|  
-    B \------\>\|    Full Adder    \|-------\> S \= A ⊕ B ⊕ Cin  
-  Cin \------\>\|                  \|-------\> Cout \= AB \+ Cin(A ⊕ B)  
-             \+------------------+
+*Paso 5, esquema:* una XOR y una AND que comparten las mismas entradas.
 
-###### *Detección de Desbordamiento por Hardware ( Overflow )*
+```text
+        ┌───────┐
+ A ──●──┤  XOR  ├── S = A ⊕ B
+     │  │       │
+ B ──┼●─┤       │
+     ││ └───────┘
+     ││ ┌───────┐
+     │└─┤  AND  ├── Cout = A · B
+     └──┤       │
+        └───────┘
+```
 
-En la aritmética binaria con signo bajo representación en  **Complemento a Dos** , un sistema de  \$n\$  bits permite representar valores numéricos en el rango estricto:  
-\$\$\\text{Rango} \= \-2^{n-1}, \+2^{n-1} \- 1\$\$  
-Para un sistema de 4 bits, el rango operativo abarca desde  \$-8\$  ( \$1000\_2\$ ) hasta  \$+7\$  ( \$0111\_2\$ ). El  **desbordamiento**  ( *overflow* ) es la condición anómala que ocurre cuando el resultado numérico de una operación excede la capacidad de almacenamiento física del registro de destino.  
-Un caso crítico ocurre al realizar la adición de dos números de igual signo:  \$\$\\text{Ejemplo con 4 bits: } (+7) \+ (+1) \\longrightarrow 0111\_2 \+ 0001\_2 \= 1000\_2 \\quad (\\text{Resultado en Complemento a 2: } \-8 \\neq \+8)\$\$  
-El hardware detecta esta falla aritmética mediante la evaluación de los acarreos en el bit más significativo (MSB). Específicamente, existe desbordamiento ( \$V \= 1\$ ) si y solo si el acarreo entrante al MSB ( \$C\_{in\\\_msb}\$ ) difiere del acarreo saliente de dicho bit ( \$C\_{out\\\_msb}\$ ):  
-\$\$V \= C\_{in\\\_msb} \\oplus C\_{out\\\_msb}\$\$  
-Equivalentemente, en términos de los bits de signo de los operandos ( \$A\_{msb}, B\_{msb}\$ ) y del resultado ( \$S\_{msb}\$ ), la condición se formula como:  
-\$\$V \= A\_{msb} B\_{msb} \\bar{S}*{msb} \+ \\bar{A}*{msb} \\bar{B}*{msb} S*{msb}\$\$  
-Bloque Lógico,Entradas,Salidas,Incorpora  \$C\_{in}\$ ?,Dominio de Aplicación  
-Half Adder,"2 ( \$A, B\$ )","2 ( \$S, C\_{out}\$ )",No,Adición del Bit Menos Significativo (LSB).  
-Full Adder,"3 ( \$A, B, C\_{in}\$ )","2 ( \$S, C\_{out}\$ )",Sí,Adición de bits intermedios y MSB en procesadores multibit.  
-El análisis de la arquitectura demuestra que, mientras el Half Adder está confinado al procesamiento del LSB, el Full Adder es el componente indispensable para la construcción de sumadores paralelos de propagación de acarreo ( *Ripple Carry Adders* ) de 8, 16, 32 o 64 bits. Esta misma infraestructura física se reconfigura para realizar operaciones de sustracción.
+### 2.2 Sumador completo (*Full Adder*, FA)
 
-##### 4\. Bloques Aritméticos Avanzados: Restadores y Comparadores de Magnitud
+Añade una tercera entrada, el **acarreo de entrada** $C_{in}$, lo que permite **encadenar** varias etapas.
 
-Las Unidades Aritmético Lógicas (ALU) basan su capacidad de procesamiento y control en el cálculo de diferencias y en la evaluación de condiciones relativas entre operandos binarios.  
-                         UNIDAD ARITMÉTICO LÓGICA (ALU)  
-\+---------------------------------------------------------------------------------+  
-\|                                                                                 \|  
-\|   \+------------------------------------+    \+-------------------------------+   \|  
-\|   \|         BLOQUES RESTADORES         \|    \|    COMPARADORES DE MAGNITUD   \|   \|  
-\|   \| Diferencia (D) y Arrastre (Bout)   \|    \|    Banderas: A\>B, A\<B, A=B    \|   \|  
-\|   \+------------------------------------+    \+-------------------------------+   \|  
-\|                                                                                 \|  
-\|            Reutilización de Hardware: Sumador \+ Inversión Controlada            \|  
-\+---------------------------------------------------------------------------------+
+| $A$ | $B$ | $C_{in}$ | $S$ | $C_{out}$ |
+|---|---|---|---|---|
+| 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 1 | 0 |
+| 0 | 1 | 0 | 1 | 0 |
+| 0 | 1 | 1 | 0 | 1 |
+| 1 | 0 | 0 | 1 | 0 |
+| 1 | 0 | 1 | 0 | 1 |
+| 1 | 1 | 0 | 0 | 1 |
+| 1 | 1 | 1 | 1 | 1 |
 
-###### *Restadores Binarios Lógicos*
+**Simplificación con K-Map.** Filas con $A$ y las columnas $B\,C_{in}$:
 
-La sustracción directa de dos bits  \$A\$  (minuendo) y  \$B\$  (sustraendo) define las funciones de  **Diferencia**  ( \$D\$ ) y  **Arrastre de salida**  ( *Borrow out* ,  \$B\_{out}\$ ).
+```text
+ S (m1, m2, m4, m7)               Cout (m3, m5, m6, m7)
+       B Cin                            B Cin
+ A    00  01  11  10             A    00  01  11  10
+ 0  |  0 | 1 | 0 | 1 |           0  |  0 | 0 | 1 | 0 |
+ 1  |  1 | 0 | 1 | 0 |           1  |  0 | 1 | 1 | 1 |
+```
 
-* **Medio Restador (**  ***Half Subtractor***  **):**   \$\$D \= A \\oplus B\$\$   \$\$B\_{out} \= \\bar{A} \\cdot B\$\$  
-* **Restador Completo (**  ***Full Subtractor***  **):**  Incorpora el arrastre de entrada ( \$B\_{in}\$ ):  \$\$D \= A \\oplus B \\oplus B\_{in}\$\$   \$\$B\_{out} \= \\bar{A} B \+ \\bar{A} B\_{in} \+ B B\_{in}\$\$
+- **$S$:** los unos forman un "tablero de ajedrez", sin celdas vecinas, por lo que **no se puede agrupar**. Es la señal de una función XOR de tres variables.
+- **$C_{out}$:** tres grupos de 2: $\{m_3,m_7\} = B\,C_{in}$, $\{m_5,m_7\} = A\,C_{in}$, $\{m_6,m_7\} = AB$.
 
-###### *Sumador/Restador Integrado en Complemento a Dos*
+$$S = A \oplus B \oplus C_{in}$$
 
-En lugar de construir hardware restador independiente (lo cual duplicaría el área de silicio y la complejidad del chip), los procesadores computacionales aplican el postulado del complemento a dos:  
-\$\$A \- B \= A \+ (-B) \= A \+ \\bar{B} \+ 1\$\$  
-Esta equivalencia permite reconfigurar un sumador multibit mediante compuertas  **XOR**  que actúan como inversores controlados en las entradas del sustraendo, configurando la línea de control  \$\\text{Modo}\$  ( \$\\text{Modo} \= 0 \\rightarrow \\text{Suma}\$ ,  \$\\text{Modo} \= 1 \\rightarrow \\text{Resta}\$ ):  
-                   Arquitectura Sumador / Restador Reconfigurable  
-                                  \+-------------------+  
-                       A\_i \------\>\|                   \|  
-                                  \|    Full Adder     \|-------\> D\_i / S\_i  
-     B\_i \-------\>+-------\\        \|                   \|  
-                 \|  XOR   )------\>\|                   \|  
-     Modo \----+-\>\|\_\_\_\_\_\_\_/        \+-------------------+  
-              \|                             ^  
-              \|                             \|  
-              \+-----------------------------+ (Cin inicial \= Modo)
+$$C_{out} = AB + A\,C_{in} + B\,C_{in} = AB + C_{in}(A \oplus B)$$
 
-Cuando  \$\\text{Modo} \= 1\$ , la compuerta XOR efectúa la inversión bit a bit ( \$\\bar{B}*i\$ ) e inyecta un  \$1\$  en el acarreo de entrada del LSB ( \$C*{in\\\_0} \= 1\$ ), ejecutando la adición en complemento a dos en una única pasada de propagación. Esta reutilización arquitectónica reduce drásticamente el conteo de compuertas, disminuye el consumo de energía dinámica y simplifica el enrutamiento físico en la ALU.
+La segunda forma de $C_{out}$ reutiliza $A \oplus B$, que ya se necesita para $S$.
 
-###### *Comparadores de Magnitud Binaria*
+### 2.3 Sumador completo a partir de dos medios sumadores
 
-Un  **Comparador de Magnitud**  es un bloque combinacional que evalúa dos palabras binarias de  \$n\$  bits ( \$A\$  y  \$B\$ ) y genera tres banderas ( *flags* ) lógicas de salida mutuamente excluyentes:  \$A \> B\$ ,  \$A \< B\$  y  \$A \= B\$ .  
-La condición de  **igualdad bit a bit**  entre los bits  \$A\_i\$  y  \$B\_i\$  se procesa mediante compuertas  **XNOR**  (notación ANSI):  
-\$\$x\_i \= (A\_i \\oplus B\_i)' \= A\_i \\odot B\_i\$\$  
-Para dos palabras binarias de  \$n\$  bits, la salida de  **igualdad global**  ( \$A \= B\$ ) exige que todos los pares de bits sean idénticos, formulándose formalmente mediante la conjunción lógica de todas las compuertas XNOR:  
-\$\$(A \= B) \= \\prod\_{i=0}^{n-1} x\_i \= x\_{n-1} \\cdot x\_{n-2} \\cdots x\_1 \\cdot x\_0\$\$  
-Las condiciones de  **desigualdad de magnitud**  se derivan inspeccionando los bits desde el más significativo (MSB) hacia el menos significativo (LSB):  
-\$\$(A \> B) \= A\_{n-1} \\bar{B}*{n-1} \+ x*{n-1} A\_{n-2} \\bar{B}*{n-2} \+ x*{n-1} x\_{n-2} A\_{n-3} \\bar{B}*{n-3} \+ \\dots \+ \\left( \\prod*{i=1}^{n-1} x\_i \\right) A\_0 \\bar{B}\_0\$\$  
-\$\$(A \< B) \= \\bar{A}*{n-1} B*{n-1} \+ x\_{n-1} \\bar{A}*{n-2} B*{n-2} \+ x\_{n-1} x\_{n-2} \\bar{A}*{n-3} B*{n-3} \+ \\dots \+ \\left( \\prod\_{i=1}^{n-1} x\_i \\right) \\bar{A}\_0 B\_0\$\$  
-La derivación matemática de estos bloques combinacionales culmina con su validación física e instrumental dentro del laboratorio.
+Como $S = (A \oplus B) \oplus C_{in}$ y $C_{out} = AB + C_{in}(A \oplus B)$, el FA se arma con **2 HA y una OR**:
 
-##### 5\. Parámetros Operativos de la Práctica de Laboratorio (APE 04\)
+```text
+ HA #1:  entradas A, B       →  S1 = A ⊕ B,        C1 = A · B
+ HA #2:  entradas S1, Cin    →  S  = S1 ⊕ Cin,     C2 = S1 · Cin
+ OR:     entradas C1, C2     →  Cout = C1 + C2
 
-La contrastación experimental de las ecuaciones lógicas y la simulación del comportamiento dinámico del hardware constituyen fases indispensables en el diseño de circuitos digitales antes de la síntesis sobre silicio.  
-\===============================================================================  
-                    PARÁMETROS OPERATIVOS DE LA PRÁCTICA  
-\===============================================================================  
-  • Sesión Práctica:     APE 04 (Análisis y Práctica de Entorno / Laboratorio)  
-  • Horario Programado:  Martes 27 de octubre · 07:30 – 09:30  
-  • Entorno de Trabajo:  Simulador Logisim-evolution y bancada física TTL  
-\===============================================================================
+ A ──┐        ┌──────┐ S1  ┌──────┐
+     ├────────┤ HA#1 ├─────┤ HA#2 ├──── S
+ B ──┘        │      │     │      │
+              └──┬───┘ Cin─┤      ├─ C2 ─┐
+                 C1        └──────┘      OR ── Cout
+                 └─────────────────────────┘
+```
 
-La validación práctica en entornos de simulación como Logisim-evolution y sobre protoboards mediante circuitos integrados de la familia TTL (tales como el 74LS08 para compuertas AND, 74LS86 para XOR o sumadores integrados) permite medir cuantitativamente los tiempos de retardo de propagación ( \$t\_{pd}\$ ), verificar experimentalmente las tablas de verdad planteadas y garantizar la ausencia de fallas lógicas previamente a la implementación en sistemas incrustados o microprocesadores.  
+Equivale a **2 XOR + 2 AND + 1 OR**.
+
+### 2.4 Sumador paralelo con propagación de acarreo (*Ripple Carry*)
+
+Para sumar palabras de $n$ bits se conectan $n$ FA en cascada: el $C_{out}$ de cada etapa entra como $C_{in}$ de la siguiente.
+
+```text
+          A3 B3        A2 B2        A1 B1        A0 B0
+           │ │          │ │          │ │          │ │
+ Cout ◄── [FA3] ◄─C3─ [FA2] ◄─C2─ [FA1] ◄─C1─ [FA0] ◄── Cin = 0
+           │            │            │            │
+           S3           S2           S1           S0
+```
+
+- El bit 0 (LSB) puede usar un HA, o un FA con $C_{in} = 0$.
+- **Limitación:** cada etapa debe esperar el acarreo de la anterior, así que el retardo total **crece con el número de bits**.
+
+**Ejemplo: $5 + 3$ en 4 bits**
+
+| Bit | $A$ | $B$ | $C_{in}$ | $S$ | $C_{out}$ |
+|---|---|---|---|---|---|
+| 0 | 1 | 1 | 0 | 0 | 1 |
+| 1 | 0 | 1 | 1 | 0 | 1 |
+| 2 | 1 | 0 | 1 | 0 | 1 |
+| 3 | 0 | 0 | 1 | 1 | 0 |
+
+Resultado: $S_3S_2S_1S_0 = 1000_2$.
+
+### 2.5 Detección de desbordamiento por hardware
+
+La regla de la Semana 1 (acarreo que entra al MSB distinto del que sale) se implementa con **una sola XOR** sobre los acarreos del último FA:
+
+$$V = C_{in,\,msb} \oplus C_{out,\,msb}$$
+
+En el ejemplo $5 + 3$: al bit 3 entra un acarreo (`1`) y no sale ninguno (`0`), luego $V = 1$. En efecto, $+8$ no cabe en 4 bits con signo y $1000_2$ se lee como $-8$.
+
+Forma equivalente, usando los bits de signo de los operandos ($A_{s}$, $B_{s}$) y del resultado ($S_{s}$):
+
+$$V = A_s B_s S_s' + A_s' B_s' S_s$$
+
+(dos positivos que dan negativo, o dos negativos que dan positivo).
+
+| Bloque | Entradas | Salidas | ¿Tiene $C_{in}$? | Uso |
+|---|---|---|---|---|
+| HA | 2 ($A$, $B$) | 2 ($S$, $C_{out}$) | No | Bit menos significativo |
+| FA | 3 ($A$, $B$, $C_{in}$) | 2 ($S$, $C_{out}$) | Sí | Bits intermedios y más significativo |
+
+---
+
+## 3. Restadores
+
+### 3.1 Restadores dedicados
+
+Se calcula $A - B$ ($A$ = minuendo, $B$ = sustraendo) con una **diferencia** $D$ y un **préstamo** (*borrow*) de salida $B_{out}$, que vale 1 cuando hace falta "pedir prestado" ($A < B$ en esa posición).
+
+**Medio restador (Half Subtractor):**
+
+| $A$ | $B$ | $D$ | $B_{out}$ |
+|---|---|---|---|
+| 0 | 0 | 0 | 0 |
+| 0 | 1 | 1 | 1 |
+| 1 | 0 | 1 | 0 |
+| 1 | 1 | 0 | 0 |
+
+$$D = A \oplus B \qquad\qquad B_{out} = A'B$$
+
+**Restador completo (Full Subtractor)**, con préstamo de entrada $B_{in}$:
+
+| $A$ | $B$ | $B_{in}$ | $D$ | $B_{out}$ |
+|---|---|---|---|---|
+| 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 1 | 1 |
+| 0 | 1 | 0 | 1 | 1 |
+| 0 | 1 | 1 | 0 | 1 |
+| 1 | 0 | 0 | 1 | 0 |
+| 1 | 0 | 1 | 0 | 0 |
+| 1 | 1 | 0 | 0 | 0 |
+| 1 | 1 | 1 | 1 | 1 |
+
+$$D = A \oplus B \oplus B_{in} \qquad\qquad B_{out} = A'B + A'B_{in} + B\,B_{in}$$
+
+La diferencia $D$ es igual a la suma $S$ del sumador; solo cambia el acarreo, donde aparece $A'$.
+
+### 3.2 Sumador/restador con complemento a dos
+
+Construir sumadores **y** restadores separados duplicaría el hardware. En su lugar se aprovecha que (Semana 1):
+
+$$A - B = A + (-B) = A + B' + 1$$
+
+Entonces basta con el sumador paralelo más una **XOR por bit** en la entrada $B$, que actúa como **inversor controlable** gracias a una línea `Modo`:
+
+| `Modo` | $B_i \oplus \text{Modo}$ | $C_{in}$ del bit 0 | Operación |
+|---|---|---|---|
+| 0 | $B_i$ (sin cambio) | 0 | $A + B$ |
+| 1 | $B_i'$ (invertido) | 1 | $A + B' + 1 = A - B$ |
+
+```text
+ Modo ────────────────────────────────────────┬─ (a las 4 XOR)
+                                              │
+     B3 ─XOR─┐    B2 ─XOR─┐    B1 ─XOR─┐    B0 ─XOR─┐
+             │            │            │            │
+     A3 ───[FA3]◄─C3──[FA2]◄─C2──[FA1]◄─C1──[FA0]◄─── Cin0 = Modo
+             │            │            │            │
+             R3           R2           R1           R0
+```
+
+El mismo circuito suma o resta según `Modo`, y con la XOR de la sección 2.5 se obtiene también el indicador de desbordamiento $V$.
+
+**Ejemplo: $5 - 3$ con `Modo` = 1**
+
+```text
+ A        = 0101
+ B        = 0011  →  B XOR 1 = 1100
+ Cin0     = 1
+ 0101 + 1100 + 1 = 1 0010   →   R = 0010 = +2
+```
+
+Acarreos: entra `1` al MSB y sale `1`, luego $V = 0$.
+
+> En una resta, un $C_{out}$ final igual a `1` indica que **no hubo préstamo** (es decir, $A \ge B$ si se interpretan como números sin signo); `0` indica que sí lo hubo.
+
+---
+
+## 4. Comparadores de magnitud
+
+Un **comparador** recibe dos palabras de $n$ bits, $A$ y $B$, y activa **exactamente una** de tres salidas: $A > B$, $A = B$ o $A < B$.
+
+### 4.1 Comparador de 1 bit
+
+| $A$ | $B$ | $A > B$ | $A = B$ | $A < B$ |
+|---|---|---|---|---|
+| 0 | 0 | 0 | 1 | 0 |
+| 0 | 1 | 0 | 0 | 1 |
+| 1 | 0 | 1 | 0 | 0 |
+| 1 | 1 | 0 | 1 | 0 |
+
+$$(A>B) = A\,B' \qquad (A<B) = A'B \qquad (A=B) = (A \oplus B)' = A \odot B$$
+
+### 4.2 Comparador de $n$ bits
+
+Se define la **igualdad bit a bit** con una XNOR:
+
+$$x_i = (A_i \oplus B_i)' = A_i \odot B_i$$
+
+- **Igualdad:** las dos palabras son iguales si **todos** los bits coinciden:
+
+$$(A = B) = x_{n-1}\,x_{n-2}\cdots x_1\,x_0$$
+
+- **Mayor y menor:** se examina desde el **bit más significativo** hacia abajo. $A > B$ en el primer bit donde difieren, siempre que los bits más altos hayan sido iguales:
+
+$$(A>B) = A_{n-1}B_{n-1}' + x_{n-1}A_{n-2}B_{n-2}' + x_{n-1}x_{n-2}A_{n-3}B_{n-3}' + \cdots$$
+
+$$(A<B) = A_{n-1}'B_{n-1} + x_{n-1}A_{n-2}'B_{n-2} + x_{n-1}x_{n-2}A_{n-3}'B_{n-3} + \cdots$$
+
+Como solo una de las tres salidas es `1`, también se cumple $(A = B) = \big[(A>B) + (A<B)\big]'$.
+
+### 4.3 Ejemplo de 2 bits
+
+$$x_1 = A_1 \odot B_1 \qquad x_0 = A_0 \odot B_0$$
+
+$$(A=B) = x_1x_0 \qquad (A>B) = A_1B_1' + x_1A_0B_0' \qquad (A<B) = A_1'B_1 + x_1A_0'B_0$$
+
+**Prueba con $A = 10_2$ (2) y $B = 01_2$ (1):** $A_1B_1' = 1\cdot1 = 1$, de modo que $A > B$ y las otras dos salidas valen 0.
+
+---
+
+## 5. Práctica de laboratorio (APE 04)
+
+| Dato | Detalle |
+|---|---|
+| Sesión | APE 04 |
+| Horario | Martes 27 de octubre, 07:30 a 09:30 |
+| Entorno | Simulador **Logisim-evolution** y banco físico con chips TTL |
+
+**Chips útiles** (Semana 1): 74LS08 (AND), 74LS32 (OR), 74LS86 (XOR) y 74LS04 (NOT). Con ellos se puede armar:
+
+- **HA:** 1 XOR (74LS86) + 1 AND (74LS08).
+- **FA:** 2 XOR + 2 AND + 1 OR, o sea un 74LS86, un 74LS08 y un 74LS32.
+
+Existen además sumadores y comparadores integrados de 4 bits (por ejemplo el 74LS83 y el 74LS85).
+
+**Qué verificar:**
+
+1. Que la tabla de verdad medida coincida con la teórica, probando las $2^n$ combinaciones.
+2. El $t_{pd}$ de cada salida (simulación o instrumento).
+3. En el sumador en cascada, que el retardo aumenta con el número de etapas.
+
+---
+
+## Resumen de la semana
+
+1. El **diseño combinacional** sigue cinco pasos y, con varias salidas, cada una se simplifica por separado compartiendo términos cuando se puede.
+2. **Medio sumador:** $S = A \oplus B$, $C_{out} = AB$. **Sumador completo:** $S = A \oplus B \oplus C_{in}$, $C_{out} = AB + C_{in}(A \oplus B)$, equivalente a 2 HA + OR.
+3. Encadenando FA se obtiene el **sumador paralelo con propagación de acarreo**, cuyo retardo crece con el número de bits.
+4. El **overflow** se detecta con $V = C_{in,msb} \oplus C_{out,msb}$.
+5. **Restadores:** $D = A \oplus B \,(\oplus\, B_{in})$ y $B_{out} = A'B$ (o $A'B + A'B_{in} + BB_{in}$).
+6. El **sumador/restador** reutiliza el sumador con una XOR por bit y $C_{in,0} = \text{Modo}$: $A - B = A + B' + 1$.
+7. El **comparador** usa XNOR bit a bit para la igualdad y una inspección de MSB a LSB para mayor y menor.
+
+---
+
+## Autoevaluación
+
+1. Sume $0110 + 0111$ en 4 bits con signo. Indique el resultado y el valor de $V$.
+2. Calcule $6 - 7$ con el sumador/restador de 4 bits. ¿Qué indica el $C_{out}$?
+3. Obtenga $D$ y $B_{out}$ del restador completo para $A = 0$, $B = 1$, $B_{in} = 1$.
+4. Con el comparador de 2 bits, evalúe las tres salidas para $A = 11_2$ y $B = 10_2$.
+5. ¿Qué chips 74LS y cuántas compuertas se necesitan para un FA con compuertas básicas?
+6. Escriba la expresión de $(A<B)$ para 3 bits.
+
+<details>
+<summary>Ver respuestas</summary>
+
+1. $0110 + 0111 = 1101$, que se lee $-3$. Acarreos: entra `1` al MSB y no sale ninguno, así que $V = 1$ (overflow, $+13$ no cabe en 4 bits).
+2. $B = 0111 \to B' = 1000$, $C_{in0} = 1$: $0110 + 1000 + 1 = 1111 = -1$. No hay acarreos hacia ni desde el MSB, luego $V = 0$. $C_{out} = 0$ indica que **sí hubo préstamo** ($6 < 7$).
+3. $D = 0 \oplus 1 \oplus 1 = 0$ y $B_{out} = A'B + A'B_{in} + BB_{in} = 1$ (se cumple $0 - 1 - 1 = -2$).
+4. $x_1 = 1 \odot 1 = 1$ y $x_0 = 1 \odot 0 = 0$. Entonces $A>B = 0 + 1\cdot1\cdot1 = 1$, $A=B = 0$ y $A<B = 0$.
+5. 2 XOR (74LS86), 2 AND (74LS08) y 1 OR (74LS32): 5 compuertas en 3 chips.
+6. $(A<B) = A_2'B_2 + x_2A_1'B_1 + x_2x_1A_0'B_0$.
+
+</details>
+
+---
