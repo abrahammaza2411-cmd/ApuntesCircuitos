@@ -1,85 +1,330 @@
-### Apuntes Sintéticos: Semana 5 – Encaminamiento, Visualización de Datos y Bloques Combinacionales Complejos
+# Semana 5: Encaminamiento y Visualización de Datos con Bloques Combinacionales
 
-#### Introducción a la Lógica Combinacional Avanzada de la Semana 5
+**Asignatura:** Diseño de Circuitos · **Unidad 1:** Análisis de Lógica Combinacional con Diseño Clásico
 
-La Semana 5 marca la culminación de la Unidad 1 («Análisis de Lógica Combinacional con Diseño Clásico») en la asignatura Diseño de Circuitos de la Carrera de Computación (UNL). Tras haber establecido las bases teórico-prácticas del hardware digital —desde el comportamiento del transistor como interruptor controlado por voltaje dentro de las zonas definidas de la familia lógica TTL (como la serie 74LS08), el tratamiento algebraico mediante axiomas de Huntington y simplificación por Mapas de Karnaugh, hasta la arquitectura de bloques aritméticos elementales ( *Half Adder* ,  *Full Adder* , restadores y comparadores de magnitud)—, el diseño digital exige un escalamiento hacia subsistemas lógicos de mayor nivel de abstracción. La transición estratégica desde la manipulación de bits aislados hacia el empleo de bloques combinacionales complejos responde a la necesidad imperativa de gestionar el flujo masivo de información, multiplexar señales en buses compartidos y estructurar las interfaces de interacción entre la lógica de cómputo y el entorno físico.  
-Esta evolución en la jerarquía del diseño lógico permite trascender la implementación de ecuaciones booleanas puras para abordar la ingeniería de la ruta de datos ( *datapath* ), donde la selección de canales y el enrutamiento controlado constituyen la espina dorsal del procesamiento en la arquitectura de computadores.
+---
 
-#### Multiplexores (MUX) y Demultiplexores (DEMUX): Selección y Encaminamiento de Datos
+## Objetivos de la semana
 
-En las arquitecturas de computadores modernas, interconectar múltiples módulos de procesamiento de forma dedicada provocaría un crecimiento exponencial e inviable de líneas de transmisión físicas. Para mitigar la congestión del cableado y optimizar el uso de buses de datos compartidos, la lógica combinacional implementa dispositivos de conmutación electrónica denominados Multiplexores (MUX) y Demultiplexores (DEMUX). Estos bloques dirigen el tráfico de señales digitales administrando eficientemente el ancho de banda del canal de interconexión.  
-La relación fundamental de estos dispositivos se rige por la escala binaria entre las líneas de control o selección ( \$s\$ ) y el número de canales de datos ( \$n\$ ), donde  \$n \= 2^s\$  (o  \$s \= \\log\_2 n\$ ):
+Al terminar esta semana se debe ser capaz de:
 
-* **Multiplexor (MUX):**  Bloque combinacional conmutador de  *muchos a uno* . Recibe  \$n \= 2^s\$  entradas de datos ( \$I\_0, I\_1, \\dots, I\_{n-1}\$ ) y, mediante el código binario aplicado a  \$s\$  líneas de selección, encamina el valor lógico de una única entrada seleccionada hacia una línea de salida global ( \$Y\$ ).  
-* **Demultiplexor (DEMUX):**  Bloque combinacional conmutador de  *uno a muchos* . Realiza la función dual al MUX; toma una única línea de entrada de datos ( \$E\$ ) y la distribuye hacia una de las  \$n \= 2^s\$  líneas de salida posibles ( \$Y\_0, Y\_1, \\dots, Y\_{n-1}\$ ), según el valor presente en las  \$s\$  líneas de control.
+- Diseñar y expandir **multiplexores (MUX)** y usarlos para implementar funciones.
+- Diseñar **demultiplexores (DEMUX)** y **decodificadores**, incluida la selección de dispositivos con *Chip Select*.
+- Diseñar **codificadores**, con y sin prioridad.
+- Diseñar el **decodificador BCD a 7 segmentos** aprovechando las condiciones "no importa".
+- Combinar estos bloques con el sumador/restador para armar un pequeño sistema.
 
-Criterio de Comparación,Multiplexor (MUX),Demultiplexor (DEMUX)  
-Función Principal,Selección de canales (conmutación muchas entradas a una salida),Distribución de canales (conmutación una entrada a muchas salidas)  
-Entradas de Datos,\$n \= 2^s\$  líneas de entrada físicas,\$1\$  sola línea de entrada de datos  
-Líneas de Selección,\$s \= \\log\_2 n\$  líneas de control binario,\$s \= \\log\_2 n\$  líneas de control binario  
-Salidas,\$1\$  sola línea de salida de datos,\$n \= 2^s\$  líneas de salida independientes
+> **Conocimientos previos:** BCD y sus combinaciones inválidas (Semana 1); minitérminos y formas canónicas (Semana 2); K-Maps, condiciones "no importa" y NAND (Semana 3); sumador/restador (Semana 4). Aquí solo se aplican.
 
-##### Impacto Arquitectónico y Optimización de Recursos
+---
 
-El valor fundamental de los multiplexores y demultiplexores en la arquitectura de hardware abarca dos dimensiones críticas: la optimización del cableado físico y la síntesis lógica universal. En primer lugar, la capacidad de conmutar múltiples fuentes de datos sobre un único bus reduce de forma drástica la cantidad de líneas de interconexión y pines en los circuitos integrados, garantizando la viabilidad del diseño modular.  
-En segundo lugar, se demuestra el teorema fundamental de la lógica combinacional:  **un Multiplexor actúa como un generador universal de funciones booleanas** . Un MUX de  \$s\$  líneas de selección (poseedor de  \$2^s\$  entradas) puede sintetizar de forma directa cualquier función lógica de  \$k \= s \+ 1\$  variables (o incluso  \$k \= s\$  variables conectando constantes  \$0\$  y  \$1\$  a las entradas) sin requerir compuertas NOT, AND o OR adicionales. Esta propiedad elimina las etapas complejas de minimización de compuertas discretas en aplicaciones donde el espacio y el conteo de componentes están restringidos.  
-La selección física del canal de datos prepara el escenario para la subsiguiente etapa del procesamiento: la interpretación y adaptación del formato numérico de las señales transmitidas hacia interfaces estándar.
+## 1. Multiplexores (MUX)
 
-#### Decodificadores y Codificadores: Conversión de Representaciones de Información
+Interconectar muchos módulos con una línea dedicada para cada uno exigiría una cantidad inviable de cables y pines. Un **multiplexor** permite que varias fuentes compartan **una sola línea**.
 
-Los datos procesados internamente por los circuitos aritmético-lógicos se expresan en código binario puro o complemento a dos. Sin embargo, para interactuar con dispositivos periféricos, teclados, arreglos de memoria o elementos de visualización, se requiere una traducción continua entre distintas formas de representación digital. Los codificadores y decodificadores operan como traductores formales dentro del flujo de datos del sistema.
+Un MUX es un conmutador de **muchos a uno**: tiene $n = 2^s$ **entradas de datos** ($I_0 \dots I_{n-1}$), $s$ **líneas de selección** y **una salida** $Y$. El código binario en las líneas de selección decide cuál entrada pasa a la salida.
 
-* **Codificadores:**  Circuitos combinacionales que convierten una señal activa procedente de un conjunto de  \$2^n\$  líneas de entrada (donde idealmente solo una línea está activa a la vez) en un código binario condensado de  \$n\$  bits en la salida.  
-* **Decodificadores:**  Circuitos combinacionales que reciben un código binario de  \$n\$  bits de entrada y activan exactamente una entre  \$2^n\$  líneas de salida. En aplicaciones industriales e integrados TTL, las salidas suelen ser activas en bajo (Active-LOW, p. ej.,  \$\\overline{Y\_i} \= 0\$ ), optimizando el acoplamiento con líneas de habilitación de chips ( *Chip Select* ,  \$\\overline{CS}\$ ).
+$$n = 2^s \qquad\Longleftrightarrow\qquad s = \log_2 n$$
 
-La conversión de representaciones atiende a restricciones físicas y operativas del hardware:
+### 1.1 MUX 2:1 y 4:1
 
-* **Decimal Codificado en Binario (BCD):**  Representa cada dígito decimal ( \$0\$  al  \$9\$ ) mediante un cuarteto binario ( \$0000\_2\$  a  \$1001\_2\$ ). Debido a que  \$4\$  bits permiten  \$16\$  combinaciones ( \$2^4\$ ), las combinaciones binarias restantes  \$1010\_2, 1011\_2, 1100\_2, 1101\_2, 1110\_2\$  y  \$1111\_2\$  ( \$10\_{10}\$  a  \$15\_{10}\$ ) representan estados inválidos/no utilizados. En el diseño combinacional clásico de decodificadores para displays de 7 segmentos (p. ej., excitadores de cátodo o ánodo común), estas 6 combinaciones se tratan como condiciones de «no importa» ( *Don't Care* ), permitiendo simplificar de forma sustancial las ecuaciones lógicas mediante Mapas de Karnaugh.  
-* **Código Gray:**  Código no ponderado cuya propiedad fundamental exige que entre dos valores numéricos adyacentes solo cambie  **un bit** . En codificadores mecánicos y perillas rotativas ( *rotary encoders* ), la transición en binario natural de  \$3\_{10}\$  a  \$4\_{10}\$  ( \$011\_2 \\rightarrow 100\_2\$ ) implica la conmutación simultánea de 3 bits; a nivel físico, los microdesfasajes mecánicos hacen que el sensor lea estados ambiguos transitorios ( *glitches*  o lecturas falsas). El código Gray (construido algebraicamente mediante la técnica del espejo) elimina los errores de conmutación al garantizar transiciones monobit.  
-* **Código ASCII:**  Formato estándar de 7 bits que mapea 128 caracteres alfanuméricos y señales de control, permitiendo la traducción de cadenas de texto a buses binarios de hardware.
+**MUX 2:1** ($s = 1$):
 
-Transición Binaria Natural (Riesgo de Glitch por conmutación múltiple):  
-  011\_2  \---\> \[ 001\_2 / 000\_2 / 111\_2 \] \---\>  100\_2  (¡3 bits conmutan simultáneamente\!)
+| $S$ | $Y$ |
+|---|---|
+| 0 | $I_0$ |
+| 1 | $I_1$ |
 
-Transición Código Gray (Sin Glitch, cambio monobit garantizado):  
-  010\_Gray (3) \-----------------------------\> 110\_Gray (4) (¡Solo conmuta 1 bit\!)
+$$Y = S'\,I_0 + S\,I_1$$
 
-##### Casos de Aplicación Clave
+**MUX 4:1** ($s = 2$, selección $S_1S_0$):
 
-* **Decodificación de Direcciones de Memoria:**  Un decodificador de  \$n\$  a  \$2^n\$  toma el bus de direcciones del procesador y activa la línea específica de Habilitación de Chip ( \$\\overline{CS}\$  \-  *Chip Select* ) de un banco de memoria RAM, ROM o registro de E/S específico.  
-* **Interfaz para Visualización de Datos (Display de 7 Segmentos):**  Decodificadores BCD a 7 segmentos que convierten cuartetos binarios válidos ( \$0000\_2\$ – \$1001\_2\$ ) en combinaciones de excitación para los leds ( \$a, b, c, d, e, f, g\$ ) de un display.  
-* **Codificación de Teclados y Matrices de Entradas:**  Codificadores de prioridad que transforman el cierre mecánico de un botón en un código numérico binario utilizable por la CPU.  
-* **Sensores de Posición Angular:**  Codificadores ópticos y mecánicos basados en discos con patrón de código Gray para evitar lecturas espurias en la medición de velocidad y posición.
+| $S_1$ | $S_0$ | $Y$ |
+|---|---|---|
+| 0 | 0 | $I_0$ |
+| 0 | 1 | $I_1$ |
+| 1 | 0 | $I_2$ |
+| 1 | 1 | $I_3$ |
 
-##### Interfaz de Hardware y Traducción Eficiente de Código
+$$Y = S_1'S_0'\,I_0 + S_1'S_0\,I_1 + S_1S_0'\,I_2 + S_1S_0\,I_3$$
 
-La decodificación y codificación eficaces resuelven la brecha entre la abstracción binaria interna del computador y las interfaces físicas de entrada/salida. Sin la decodificación de direcciones por hardware, la arquitectura carecería de un mecanismo determinista para seleccionar celdas de memoria o registros sin colisiones en el bus; del mismo modo, la decodificación BCD optimizada permite traducir magnitudes computadas a formatos visuales sin sobrecargar la unidad central con algoritmos de conversión por software. La velocidad de respuesta del sistema digital depende directamente de la eficiencia de estos bloques combinacionales traducidos a silicio.  
-Al integrar los módulos de selección (MUX/DEMUX) con los convertidores de formato (decodificadores/codificadores), se sientan las bases para interconectarlos con los módulos aritméticos en un subsistema unificado de procesamiento.
+En general, $Y = \sum_i m_i(S)\cdot I_i$: cada entrada de datos queda "habilitada" por el minitérmino de las líneas de selección que le corresponde. Se implementa con AND-OR: una AND por entrada y una OR final.
 
-#### Integración de Bloques Aritméticos y Combinacionales Avanzados
+### 1.2 Expansión
 
-El potencial del diseño lógico combinacional se alcanza mediante la articulación jerárquica de bloques funcionales simples para conformar la ruta de datos ( *datapath* ) de una Unidad Aritmético-Lógica (ALU) y su sistema de control subyacente. Las arquitecturas de computadores no funcionan mediante puertas aisladas, sino mediante la orquestación coordinada de módulos aritméticos, de enrutamiento y de traducción.  
-La integración modular articula los siguientes componentes fundamentales:
+Un MUX grande se arma con MUX más pequeños en forma de **árbol**. Por ejemplo, un **8:1** con dos 4:1 y un 2:1:
 
-1. **Bloques Aritméticos:**  El  *Half Adder*  ( \$HA\$ ) suma 2 bits generando Suma ( \$S\$ ) y Acarreo ( \$C\$ ), mientras que el  *Full Adder*  ( \$FA\$ ) procesa 3 bits incorporando el acarreo de entrada ( \$C\_{in}\$ ) y produciendo  \$C\_{out}\$ . Estos se encadenan para formar sumadores/restadores en paralelo con detección de desbordamiento de signo ( \$V\$ ) en aritmética de complemento a dos, acoplados a comparadores de magnitud que evalúan relaciones  \$A \> B\$ ,  \$A \< B\$  y  \$A \= B\$ .  
-2. **Bloques de Encaminamiento (MUX/DEMUX):**  Actúan como conmutadores de la ruta de datos. Un MUX de entrada selecciona si la ALU procesará un dato proveniente del banco de registros, de la memoria principal o de una constante; a la salida, un DEMUX o una estructura de bus canaliza el resultado aritmético hacia el destino correcto.  
-3. **Bloques de Conversión (Decodificadores):**  Interpretan la palabra de instrucción ( *opcode* ) decodificando las líneas de control que habilitan la operación exacta dentro de la ALU (Suma, Resta, Comparación) y activan los decodificadores de visualización o almacenamiento para presentar el resultado final.
+```text
+ I0..I3 ──► [MUX 4:1] ──┐
+            S1 S0       ├─► [MUX 2:1] ──► Y
+ I4..I7 ──► [MUX 4:1] ──┘      S2
+            S1 S0
+```
 
-                               RUTA DE DATOS (DATAPATH) INTEGRADA  
-                          \+------------------------------------------+  
-                          \|                                          \|  
-Entradas (Reg A, B) \----\> \| \[MUX Entrada\] \-\> \[ALU: HA/FA/Comp\]      \|  
-                          \|                       \|                  \|  
-Líneas Control/Opcode \--\> \| \[Decodificador\] \----\> (Operación)        \|  
-                          \|                       \|                  \|  
-                          \|                       v                  \|  
-                          \|  \[DEMUX Salida / Decodificador BCD\]     \|  
-                          \+-----------------------+------------------+  
-                                                  \|  
-                                                  v  
-                                Display 7-Seg / Bus Memoria (CS)
+Los bits bajos ($S_1S_0$) van a los dos 4:1 y el bit alto ($S_2$) elige entre sus salidas.
 
-##### Escalamiento Modular y Fundamento de la Ruta de Datos
+### 1.3 El MUX como generador de funciones
 
-La integración sintética de bloques combinacionales avanzados demuestra cómo la complejidad computacional se construye sobre capas sucesivas de abstracción. La combinación de circuitos aritméticos ( \$HA/FA\$ ) con estructuras de control de flujo (MUX/DEMUX) y traducción de interfaz (decodificadores) consolida la infraestructura física real sobre la cual la CPU ejecuta instrucciones binarias. Esta metodología modular permite escalar el diseño desde compuertas lógicas individuales hasta procesadores completos, garantizando alta velocidad de propagación, bajo consumo de compuertas y una gestión estructurada de los datos a nivel de bus.  
-Con la integración funcional del encaminamiento mediante MUX/DEMUX, la conversión de representaciones con decodificadores/codificadores y su acoplamiento con la aritmética digital al cierre de la Semana 5, se completa el alcance teórico-práctico de la Unidad 1 («Análisis de Lógica Combinacional con Diseño Clásico»), dotando al estudiante del marco conceptual e ingenieril para abordar las arquitecturas lógicas secuenciales y la estructura interna de las computadoras.  
+Un MUX con $s$ líneas de selección puede implementar **cualquier función**:
+
+- **De $s$ variables:** las variables van a las líneas de selección y cada entrada de datos se conecta a `0` o `1`, según el valor de la función en esa fila. No hace falta ninguna compuerta adicional.
+- **De $s + 1$ variables:** las $s$ primeras van a la selección y la última variable se usa **como dato**. Para cada par de filas que comparten selección, la entrada de datos recibe `0`, `1`, la variable o su complemento (esto último puede requerir un inversor).
+
+**Ejemplo 1: la bomba, $F = \Sigma m(3, 6, 7)$ con un MUX 4:1** (selección $S_1 = A$, $S_0 = B$; dato: $C$).
+
+| $A\,B$ | Filas | $F$ en función de $C$ | Entrada |
+|---|---|---|---|
+| 00 | $m_0, m_1$ | $0, 0$ → `0` | $I_0 = 0$ |
+| 01 | $m_2, m_3$ | $0, 1$ → $C$ | $I_1 = C$ |
+| 10 | $m_4, m_5$ | $0, 0$ → `0` | $I_2 = 0$ |
+| 11 | $m_6, m_7$ | $1, 1$ → `1` | $I_3 = 1$ |
+
+**Ejemplo 2: $F = \Sigma m(1, 2, 6, 7)$**
+
+| $A\,B$ | Filas | $F$ en función de $C$ | Entrada |
+|---|---|---|---|
+| 00 | $m_0, m_1$ | $0, 1$ → $C$ | $I_0 = C$ |
+| 01 | $m_2, m_3$ | $1, 0$ → $C'$ | $I_1 = C'$ |
+| 10 | $m_4, m_5$ | $0, 0$ → `0` | $I_2 = 0$ |
+| 11 | $m_6, m_7$ | $1, 1$ → `1` | $I_3 = 1$ |
+
+Este último necesita un inversor para $C'$. Se evita todo el proceso de minimización de compuertas, lo que resulta útil cuando importa reducir componentes.
+
+### 1.4 Circuitos integrados comunes
+
+| Chip | Contenido |
+|---|---|
+| 74LS157 | 4 MUX 2:1 (selector común) |
+| 74LS153 | 2 MUX 4:1 |
+| 74LS151 | 1 MUX 8:1 |
+
+---
+
+## 2. Decodificadores y demultiplexores (DEMUX)
+
+### 2.1 Decodificador $n$ a $2^n$
+
+Recibe un código de $n$ bits y activa **exactamente una** de sus $2^n$ salidas: aquella cuyo índice coincide con el código. Cada salida es un **minitérmino** de las entradas.
+
+**Decodificador 2:4 con habilitación $E$:**
+
+| $E$ | $A_1$ | $A_0$ | $Y_0$ | $Y_1$ | $Y_2$ | $Y_3$ |
+|---|---|---|---|---|---|---|
+| 0 | X | X | 0 | 0 | 0 | 0 |
+| 1 | 0 | 0 | 1 | 0 | 0 | 0 |
+| 1 | 0 | 1 | 0 | 1 | 0 | 0 |
+| 1 | 1 | 0 | 0 | 0 | 1 | 0 |
+| 1 | 1 | 1 | 0 | 0 | 0 | 1 |
+
+$$Y_0 = E\,A_1'A_0' \quad Y_1 = E\,A_1'A_0 \quad Y_2 = E\,A_1A_0' \quad Y_3 = E\,A_1A_0$$
+
+Con $E = 0$ ninguna salida se activa. **Salidas activas en bajo:** en muchos chips TTL la salida seleccionada vale `0` y las demás `1` ($\overline{Y_i}$). Es la convención usual para acoplar con entradas de habilitación que son activas en bajo.
+
+### 2.2 Demultiplexor (DEMUX)
+
+Es el bloque **dual** del MUX: de **uno a muchos**. Toma una única línea de datos $D$ y la entrega a **una** de las $2^s$ salidas, según las $s$ líneas de selección.
+
+$$Y_0 = D\,S_1'S_0' \quad Y_1 = D\,S_1'S_0 \quad Y_2 = D\,S_1S_0' \quad Y_3 = D\,S_1S_0$$
+
+**Observación clave:** las ecuaciones son idénticas a las del decodificador con $E$ en lugar de $D$. Por eso **un decodificador con habilitación funciona como DEMUX**: se usa la entrada $E$ como línea de datos.
+
+| | MUX | DEMUX |
+|---|---|---|
+| Sentido | Muchas entradas → una salida | Una entrada → muchas salidas |
+| Entradas de datos | $2^s$ | 1 |
+| Salidas | 1 | $2^s$ |
+| Líneas de selección | $s$ | $s$ |
+
+### 2.3 Expansión
+
+Un decodificador de 3 a 8 se arma con dos de 2 a 4. El bit más significativo $A_2$ decide cuál de los dos queda habilitado:
+
+```text
+ A1 A0 ─┬──► [Dec 2:4, E = A2'] ──► Y0 .. Y3
+        │
+        └──► [Dec 2:4, E = A2 ] ──► Y4 .. Y7
+```
+
+### 2.4 Implementación de funciones con un decodificador
+
+Como cada salida es un minitérmino, basta **unir con OR** las salidas de los minitérminos de la función. Con un decodificador de **salidas activas en bajo**, se usa una **NAND**:
+
+$$F = \Sigma m(3, 6, 7) = \Big(\overline{Y_3}\cdot\overline{Y_6}\cdot\overline{Y_7}\Big)'$$
+
+(es la NAND de las salidas $\overline{Y_3}$, $\overline{Y_6}$ y $\overline{Y_7}$). Se puede implementar un decodificador $3{:}8$ más una NAND de 3 entradas en lugar de toda una red de compuertas.
+
+### 2.5 Aplicación: selección de dispositivos (*Chip Select*)
+
+Un procesador usa un **bus de direcciones**: un conjunto de líneas cuyo valor indica a qué posición o dispositivo se quiere acceder. Un decodificador toma las líneas de dirección más altas y activa la línea de habilitación $\overline{CS}$ de **un solo** dispositivo (memoria, registro, puerto de E/S).
+
+```text
+ Líneas de dirección ──► [Decodificador] ──► CS0' → Memoria A
+ (altas)                                    CS1' → Memoria B
+                                            CS2' → Puerto de E/S
+                                            ...
+```
+
+Así nunca se activan dos dispositivos a la vez sobre el mismo bus.
+
+| Chip | Contenido |
+|---|---|
+| 74LS138 | Decodificador 3:8, salidas activas en bajo, con 3 entradas de habilitación |
+| 74LS139 | 2 decodificadores 2:4 |
+
+---
+
+## 3. Codificadores
+
+El **codificador** realiza la función inversa del decodificador: tiene $2^n$ líneas de entrada y entrega en $n$ bits el **código de la línea activa**.
+
+### 3.1 Codificador simple
+
+Supone que **solo una** entrada está activa a la vez. Ejemplo 4:2:
+
+| $D_3$ | $D_2$ | $D_1$ | $D_0$ | $A_1$ | $A_0$ |
+|---|---|---|---|---|---|
+| 0 | 0 | 0 | 1 | 0 | 0 |
+| 0 | 0 | 1 | 0 | 0 | 1 |
+| 0 | 1 | 0 | 0 | 1 | 0 |
+| 1 | 0 | 0 | 0 | 1 | 1 |
+
+$$A_1 = D_3 + D_2 \qquad A_0 = D_3 + D_1$$
+
+**Problemas:** si se activan **dos** entradas a la vez la salida es incorrecta (por ejemplo, $D_3$ y $D_0$ dan `11`, igual que $D_3$ solo), y si **ninguna** está activa la salida `00` se confunde con la entrada $D_0$.
+
+### 3.2 Codificador con prioridad
+
+Soluciona ambos problemas: si hay varias entradas activas, **codifica la de mayor prioridad** (aquí, el índice más alto), y agrega una salida de **validez** $V$ que indica si alguna entrada está activa.
+
+| $D_3$ | $D_2$ | $D_1$ | $D_0$ | $A_1$ | $A_0$ | $V$ |
+|---|---|---|---|---|---|---|
+| 0 | 0 | 0 | 0 | X | X | 0 |
+| 0 | 0 | 0 | 1 | 0 | 0 | 1 |
+| 0 | 0 | 1 | X | 0 | 1 | 1 |
+| 0 | 1 | X | X | 1 | 0 | 1 |
+| 1 | X | X | X | 1 | 1 | 1 |
+
+$$A_1 = D_3 + D_2 \qquad A_0 = D_3 + D_2'D_1 \qquad V = D_3 + D_2 + D_1 + D_0$$
+
+### 3.3 Aplicación y chip
+
+El caso típico es un **teclado**: cada tecla cierra una línea y el codificador con prioridad entrega el código binario de la tecla pulsada, resolviendo qué hacer si se pulsan dos a la vez. El chip clásico es el **74LS148** (8 a 3, con entradas y salidas activas en bajo).
+
+---
+
+## 4. Decodificador BCD a 7 segmentos
+
+El **display de 7 segmentos** se forma con siete LED ($a$ a $g$) dispuestos así:
+
+```text
+   ─ a ─
+  f     b
+   ─ g ─
+  e     c
+   ─ d ─
+```
+
+- **Cátodo común:** los cátodos van juntos a tierra y un segmento se enciende con `1`.
+- **Ánodo común:** los ánodos van juntos a $V_{CC}$ y un segmento se enciende con `0` (salidas activas en bajo).
+- Cada segmento necesita su **resistencia limitadora** de corriente (típicamente de 220 a 330 Ω) para no dañar el LED.
+
+### 4.1 Tabla de verdad (cátodo común, 1 = encendido)
+
+Entradas BCD $ABCD$; las combinaciones 10 a 15 son inválidas, es decir, **X** en todas las salidas.
+
+| Dígito | $ABCD$ | $a$ | $b$ | $c$ | $d$ | $e$ | $f$ | $g$ |
+|---|---|---|---|---|---|---|---|---|
+| 0 | 0000 | 1 | 1 | 1 | 1 | 1 | 1 | 0 |
+| 1 | 0001 | 0 | 1 | 1 | 0 | 0 | 0 | 0 |
+| 2 | 0010 | 1 | 1 | 0 | 1 | 1 | 0 | 1 |
+| 3 | 0011 | 1 | 1 | 1 | 1 | 0 | 0 | 1 |
+| 4 | 0100 | 0 | 1 | 1 | 0 | 0 | 1 | 1 |
+| 5 | 0101 | 1 | 0 | 1 | 1 | 0 | 1 | 1 |
+| 6 | 0110 | 1 | 0 | 1 | 1 | 1 | 1 | 1 |
+| 7 | 0111 | 1 | 1 | 1 | 0 | 0 | 0 | 0 |
+| 8 | 1000 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
+| 9 | 1001 | 1 | 1 | 1 | 1 | 0 | 1 | 1 |
+
+Es un circuito de **4 entradas y 7 salidas**: se simplifica **cada segmento** con su propio K-Map, usando las X (método de la Semana 4 para varias salidas).
+
+### 4.2 Ejemplo: segmento $a$
+
+$a = \Sigma m(0, 2, 3, 5, 6, 7, 8, 9) + d(10, 11, 12, 13, 14, 15)$
+
+```text
+          CD
+ AB      00    01    11    10
+ 00   |  1  |  0  |  1  |  1  |
+ 01   |  0  |  1  |  1  |  1  |
+ 11   |  X  |  X  |  X  |  X  |
+ 10   |  1  |  1  |  X  |  X  |
+```
+
+- Filas `11` y `10` completas (celdas 8 a 15): grupo de 8 → $A$.
+- Columnas `11` y `10` completas (celdas 2, 3, 6, 7, 10, 11, 14, 15): grupo de 8 → $C$.
+- Bloque central ($m_5, m_7, m_{13}, m_{15}$) → $BD$.
+- Esquinas ($m_0, m_2, m_8, m_{10}$) → $B'D'$.
+
+$$a = A + C + BD + B'D'$$
+
+Los demás segmentos se obtienen igual (ver autoevaluación para $g$).
+
+### 4.3 Con ánodo común y chip integrado
+
+Para un display de ánodo común hay que **invertir** las salidas (activas en bajo). Los chips comerciales ya lo hacen: el **74LS47** (salidas activas en bajo, ánodo común) y el **74LS48** (salidas activas en alto, cátodo común).
+
+> **Cuidado:** este decodificador solo muestra correctamente valores BCD de 0 a 9. Un resultado binario de 4 bits mayor que 9 (por ejemplo, el de un sumador) **no se verá bien** sin una conversión previa.
+
+---
+
+## 5. Integración: un sistema sencillo
+
+Los bloques de las semanas anteriores y de esta se combinan en un sistema de "selección, cálculo y visualización":
+
+```text
+ Puerto X ─┐
+           ├► [MUX 2:1 ×4 bits] ─► B ─┐
+ Puerto Y ─┘     (selecciona)          ├► [Sumador/Restador] ─► R ─► [Dec. BCD-7seg] ─► Display
+                                A ─────┘        ▲ Modo                   ▲
+                                                                       sólo 0 a 9
+```
+
+1. **MUX** (74LS157): elige de qué puerto proviene el segundo operando.
+2. **Sumador/restador** (Semana 4): calcula $A + B$ o $A - B$ según `Modo`.
+3. **Decodificador BCD a 7 segmentos:** muestra el resultado, siempre que esté en el rango 0 a 9.
+4. Un **decodificador con $\overline{CS}$** puede además elegir cuál de varios dispositivos de salida recibe el resultado.
+
+---
+
+## Resumen de la semana
+
+1. El **MUX** ($2^s$ entradas, $s$ selectores, 1 salida) comparte una línea entre varias fuentes. Se expande en árbol y es un **generador universal de funciones**: $s$ selectores implementan funciones de $s$ variables, o de $s+1$ con la última variable como dato.
+2. El **decodificador** $n$ a $2^n$ activa una sola salida, que es un minitérmino; con habilitación $E$ también funciona como **DEMUX**. Se expande con la entrada $E$ y permite implementar funciones y generar los $\overline{CS}$ de los dispositivos.
+3. El **codificador** hace la función inversa; el **codificador con prioridad** resuelve las entradas múltiples y añade la salida de validez $V$.
+4. El **decodificador BCD a 7 segmentos** son 7 funciones de 4 variables, simplificadas con las X de los códigos 10 a 15. Hay que distinguir cátodo común de ánodo común.
+5. Estos bloques se integran con los aritméticos de la semana anterior en sistemas de selección, cálculo y visualización.
+
+---
+
+## Autoevaluación
+
+1. ¿Cuántas líneas de selección tiene un MUX 16:1 y cuántos MUX 4:1 se necesitan para armarlo?
+2. Implemente $F = \Sigma m(0, 3, 5, 6)$ con un MUX 4:1 (selección $A$, $B$; dato $C$).
+3. Un codificador con prioridad $4{:}2$ recibe $D_3D_2D_1D_0 = 0110$. ¿Cuánto valen $A_1$, $A_0$ y $V$?
+4. Obtenga la expresión mínima del segmento $g$ del decodificador BCD a 7 segmentos.
+5. Describa cómo armar un decodificador 3:8 con dos decodificadores 2:4.
+6. ¿Qué pasa si a un decodificador BCD a 7 segmentos le llega `1011`?
+
+<details>
+<summary>Ver respuestas</summary>
+
+1. $s = \log_2 16 = 4$ líneas de selección. Se necesitan 5 MUX 4:1: cuatro en la primera etapa (16 entradas) y uno en la segunda.
+2. $I_0 = C'$ (filas 0, 1: $1, 0$), $I_1 = C$ (filas 2, 3: $0, 1$), $I_2 = C$ (filas 4, 5: $0, 1$) e $I_3 = C'$ (filas 6, 7: $1, 0$).
+3. Está activa la entrada de mayor índice, $D_2$: $A_1 = 1$, $A_0 = 0$ (código `10`) y $V = 1$.
+4. $g = \Sigma m(2,3,4,5,6,8,9) + d(10,\dots,15)$. Grupos: $A$ (celdas 8 a 15), $B'C$ (2, 3, 10, 11), $BC'$ (4, 5, 12, 13) y $CD'$ (2, 6, 10, 14): $g = A + B'C + BC' + CD'$.
+5. Se conectan $A_1A_0$ a ambos; el primero se habilita con $E = A_2'$ y da $Y_0$ a $Y_3$; el segundo con $E = A_2$ y da $Y_4$ a $Y_7$.
+6. $1011_2$ (11) no es un dígito BCD válido: es una condición X. Los segmentos que se encienden dependen de cómo se resolvieron las X en el diseño (o del chip); el display mostrará un símbolo arbitrario.
+
+</details>
+
+---
