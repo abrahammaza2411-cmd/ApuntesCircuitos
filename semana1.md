@@ -1,353 +1,469 @@
-### Apuntes Académicos de Diseño de Circuitos: Semana 1 — Sistemas Numéricos, Códigos y Compuertas Lógicas
+# Semana 1: Sistemas Numéricos, Códigos y Compuertas Lógicas
 
-#### Introducción Ejecutiva
+**Asignatura:** Diseño de Circuitos · **Unidad 1:** Análisis de Lógica Combinacional con Diseño Clásico
 
-El procesamiento digital de información en la arquitectura moderna de computadores se fundamenta en la abstracción de variables físicas continuas a estados discretos binarios. En el nivel más bajo del hardware, la información no existe como conceptos abstractos, sino como niveles de voltaje manipulados por millones de transistores operando como interruptores controlados por tensión. Comprender la transición teórica y práctica desde los rangos de voltaje operacional hasta la estructuración matemática de datos es un requisito indispensable para el diseño de sistemas combinacionales. Esta unidad temática establece las bases operativas de la electrónica digital, abarcando desde los márgenes de ruido físico hasta los sistemas numéricos posicionales, códigos de representación de información, aritmética en complemento a dos, funciones lógicas fundamentales e integración física en circuitos integrados comerciales de la familia TTL.
+---
 
-#### 1\. Fundamentos de Representación Binaria y Margen de Ruido
+## Objetivos de la semana
 
-La necesidad de emplear la lógica binaria ( \$0\$  y  \$1\$ ) en lugar de sistemas de múltiples niveles analógicos radica en la robustez e inmunidad frente a las perturbaciones del entorno. Las señales analógicas continuas sufren degradación sistemática por atenuación y ruido electromagnético. Al abstraer el comportamiento físico mediante transistores que actúan estrictamente como interruptores abiertos (corte) o cerrados (saturación), el sistema solo requiere distinguir entre dos estados de voltaje bien diferenciados: nivel BAJO ( \$0\$ ) y nivel ALTO ( \$1\$ ).
+Al terminar esta semana se debe ser capaz de:
 
-##### Rangos de Voltaje y Zona Indefinida en la Familia 74LS
+- Explicar por qué los computadores usan lógica binaria y cómo se relacionan los voltajes con los estados `0` y `1`.
+- Calcular márgenes de ruido a partir de las especificaciones de la familia 74LS.
+- Convertir números entre decimal, binario, octal y hexadecimal.
+- Representar enteros con signo en complemento a dos, restar sumando y detectar desbordamiento.
+- Distinguir los códigos BCD, Gray y ASCII y saber para qué sirve cada uno.
+- Conocer las 7 compuertas lógicas (tabla de verdad, expresión y símbolo).
+- Leer la hoja de datos de un circuito integrado 74LS (pines, encapsulado y nomenclatura).
 
-En los circuitos integrados digitales, un estado lógico no corresponde a un valor numérico de voltaje único o exacto, sino a rangos de tolerancia perfectamente delimitados por el fabricante. Para la familia lógica TTL de bajo consumo Schottky (74LS), la hoja de especificaciones establece los siguientes límites operativos:  
-Parámetro / Estado Lógico,Rango de Voltaje Especificado  
-Salida en ALTO (  \$V\_{OH}\$  ),Promete  \$\\ge 2.7\\text{ V}\$  (hasta  \$+5.0\\text{ V}\$ )  
-Entrada en ALTO (  \$V\_{IH}\$  ),Exige  \$\\ge 2.0\\text{ V}\$  
-Entrada en BAJO (  \$V\_{IL}\$  ),Exige  \$\\le 0.8\\text{ V}\$  
-Salida en BAJO (  \$V\_{OL}\$  ),Promete  \$\\le 0.5\\text{ V}\$  (desde  \$0.0\\text{ V}\$ )  
-El intervalo comprendido entre  \$0.8\\text{ V}\$  y  \$2.0\\text{ V}\$  constituye la denominada  **Zona Indefinida** . Dentro de esta franja, el comportamiento del circuito integrado es totalmente impredecible: el chip no garantiza si interpretará la señal como un  \$0\$  o como un  \$1\$ , pudiendo oscilar, generar estados erráticos o incrementar el consumo de corriente. La causa técnica más común para que un nodo caiga en la zona indefinida es dejar una terminal de entrada flotante (sin conectar) o provocar un acoplamiento resistivo/capacitivo deficiente entre etapas lógicas.
+---
 
-##### Análisis del Margen de Ruido ("Colchón de Seguridad")
+## 1. Señales digitales y margen de ruido
 
-El margen de ruido es la tolerancia máxima a las interferencias eléctricas que un circuito digital puede resistir antes de que una señal válida cambie su interpretación lógica al transmitirse entre etapas. Se calcula de forma independiente para ambos niveles de voltaje:
+### 1.1 ¿Por qué binario?
 
-* **Margen de Ruido de Nivel ALTO (**  **\$\\text{NM}\_H**\$  **):**   \$\$\\text{NM}*H \= V*{OH} \- V\_{IH} \= 2.7\\text{ V} \- 2.0\\text{ V} \= 0.7\\text{ V}\$\$  
-* **Margen de Ruido de Nivel BAJO (**  **\$\\text{NM}\_L**\$  **):**   \$\$\\text{NM}*L \= V*{IL} \- V\_{OL} \= 0.8\\text{ V} \- 0.5\\text{ V} \= 0.3\\text{ V}\$\$
+En el nivel más bajo del hardware, la información son **voltajes**. Las señales analógicas continuas se degradan por atenuación y ruido electromagnético. En cambio, un transistor usado como **interruptor** solo tiene dos estados:
 
-Un nivel lógico en ALTO garantizado a  \$2.7\\text{ V}\$  puede sufrir caídas o interferencias de hasta  \$0.7\\text{ V}\$  en el trayecto y continuará siendo interpretado correctamente por la compuerta receptora como un  \$1\$  (al mantenerse  \$\\ge 2.0\\text{ V}\$ ). De manera análoga, un  \$0\$  lógico garantizado a  \$0.5\\text{ V}\$  dispone de un colchón de seguridad de  \$0.3\\text{ V}\$ .  
-**Escenario práctico de falla por ruido inducido:**  Supóngase una compuerta que emite un estado BAJO nominal de  \$0.5\\text{ V}\$ . Si la línea de interconexión transcurre cerca de un motor eléctrico que induce un pico de ruido de  \$0.4\\text{ V}\$ , el voltaje efectivo recibido en la entrada de la siguiente compuerta será:  \$\$0.5\\text{ V} \+ 0.4\\text{ V} \= 0.9\\text{ V}\$\$  Dado que  \$0.9\\text{ V}\$  supera el límite  \$V\_{IL} \= 0.8\\text{ V}\$  e ingresa en la zona indefinida, el receptor no garantiza la lectura de un estado BAJO, provocando una falla catastrófica de interpretación lógica en el sistema.  
-Una vez formalizada la necesidad física de abstraer los voltajes en estados binarios discretos, resulta indispensable estudiar la estructura matemática que permite organizar dichos bits en sistemas numéricos posicionales.
+| Estado del transistor | Región | Nivel lógico típico |
+|---|---|---|
+| Interruptor abierto | Corte | BAJO (`0`) |
+| Interruptor cerrado | Saturación | ALTO (`1`) |
 
-#### 2\. Sistemas Numéricos Posicionales y Métodos de Conversión
+Basta con distinguir dos niveles bien separados, lo que vuelve al sistema **robusto frente a perturbaciones**.
 
-La representación de datos en la ciencia de la computación se apoya en los sistemas numéricos posicionales. A diferencia de los sistemas no posicionales (como la numeración romana, donde el símbolo 'V' representa el valor 5 independientemente de su ubicación en la cifra), en un sistema posicional el valor de cada dígito depende directamente de su posición relativa multiplicada por la potencia respectiva de la base del sistema.
+### 1.2 Rangos de voltaje de la familia 74LS (TTL, alimentación de +5 V)
 
-##### Estructura del Sistema Binario y Pesos Posicionales
+Un nivel lógico no es un voltaje exacto, sino un **rango garantizado por el fabricante**. Hay que distinguir lo que **garantiza una salida** de lo que **exige una entrada**:
 
-El sistema binario utiliza como base el número  \$2\$ , requiriendo únicamente dos símbolos:  \$\\{0, 1\\}\$ .
+| Parámetro | Símbolo | Condición | Quién lo define |
+|---|---|---|---|
+| Salida en ALTO | $V_{OH}$ | $\ge 2.7\ \text{V}$ | La compuerta emisora garantiza al menos este voltaje |
+| Entrada en ALTO | $V_{IH}$ | $\ge 2.0\ \text{V}$ | La compuerta receptora exige al menos este voltaje |
+| Entrada en BAJO | $V_{IL}$ | $\le 0.8\ \text{V}$ | La compuerta receptora exige como máximo este voltaje |
+| Salida en BAJO | $V_{OL}$ | $\le 0.5\ \text{V}$ | La compuerta emisora garantiza como máximo este voltaje |
 
-* **Bit (**  ***Binary Digit***  **):**  Unidad mínima de información digital.  
-* **Byte:**  Conjunto contiguo de 8 bits.
+```text
+ 5.0 V ─┬─────────────────────────────────────
+        │  Zona ALTO     (salida ≥ 2.7 V, entrada ≥ 2.0 V)
+ 2.7 V ─┤  ← V_OH        │ NM_H = 0.7 V
+ 2.0 V ─┤  ← V_IH        ┘
+        │
+        │  ZONA INDEFINIDA (0.8 V a 2.0 V): lectura NO garantizada
+        │
+ 0.8 V ─┤  ← V_IL        ┐
+ 0.5 V ─┤  ← V_OL        │ NM_L = 0.3 V
+        │  Zona BAJO     (entrada ≤ 0.8 V, salida ≤ 0.5 V)
+ 0.0 V ─┴─────────────────────────────────────
+```
 
-El valor numérico de una secuencia binaria se obtiene mediante la suma de los productos de cada bit por su peso posicional  \$2^n\$ , ordenados de derecha a izquierda comenzando desde  \$2^0\$ :  
-Potencia,\$2^7\$,\$2^6\$,\$2^5\$,\$2^4\$,\$2^3\$,\$2^2\$,\$2^1\$,\$2^0\$  
-Valor Decimal del Peso,128,64,32,16,8,4,2,1  
-**Evaluación del valor binario**  **\$1011\_2**\$  **:**   \$\$1011\_2 \= (1 \\times 2^3) \+ (0 \\times 2^2) \+ (1 \\times 2^1) \+ (1 \\times 2^0) \= 8 \+ 0 \+ 2 \+ 1 \= 11\_{10}\$\$
+**Zona indefinida (0.8 V a 2.0 V):** el chip no garantiza si leerá `0` o `1`. Puede oscilar, dar estados erráticos o aumentar el consumo de corriente. Se llega a ella por ruido excesivo, acoplamiento deficiente entre etapas o por dejar una **entrada flotante** (sin conectar). En TTL una entrada flotante suele comportarse como un `1`, pero eso **no está garantizado** y nunca debe aprovecharse.
 
-##### Metodología de Conversión entre Sistemas Numéricos
+### 1.3 Margen de ruido
 
-###### *Decimal a Binario (Divisiones Sucesivas)*
+El **margen de ruido** es la perturbación máxima que una señal válida puede sufrir en el trayecto y aun así ser interpretada correctamente por el receptor. Es la diferencia entre lo que el emisor garantiza y lo que el receptor exige:
 
-Para convertir un número entero decimal a su equivalente binario, se aplica el método de divisiones sucesivas entre 2 hasta obtener un cociente de 0\. La secuencia de residuos resultante se lee estrictamente en orden inverso (de abajo hacia arriba).  
-**Ejemplo de conversión de**  **\$25\_{10}**\$  **a binario:**  
-Operación de División,Cociente,Residuo  
-\$25 \\div 2\$,12,1  (LSB \- Bit menos significativo)  
-\$12 \\div 2\$,6,0  
-\$6 \\div 2\$,3,0  
-\$3 \\div 2\$,1,1  
-\$1 \\div 2\$,0,1  (MSB \- Bit más significativo)  
-Ordenando los residuos de abajo hacia arriba:  \$25\_{10} \= 11001\_2\$ .  *Comprobación por pesos:*   \$16 \+ 8 \+ 1 \= 25\$ .
+$$\text{NM}_H = V_{OH} - V_{IH} = 2.7\ \text{V} - 2.0\ \text{V} = 0.7\ \text{V}$$
 
-###### *Binario a Hexadecimal y Octal*
+$$\text{NM}_L = V_{IL} - V_{OL} = 0.8\ \text{V} - 0.5\ \text{V} = 0.3\ \text{V}$$
 
-Los sistemas Hexadecimal (base 16\) y Octal (base 8\) se emplean como abreviaturas compactas del sistema binario. Dado que  \$16 \= 2^4\$  y  \$8 \= 2^3\$ , un dígito hexadecimal resume exactamente 4 bits (nibble), mientras que un dígito octal resume 3 bits.  
-En el sistema Hexadecimal, los valores del 10 al 15 se representan mediante letras mayúsculas:  
-Decimal,10,11,12,13,14,15  
-Hexadecimal,A,B,C,D,E,F  
-**Reglas de conversión:**
+> **Ejemplo de falla por ruido.** Una compuerta emite un BAJO de $0.5\ \text{V}$ y la línea pasa cerca de un motor que induce un pico de $0.4\ \text{V}$. En la entrada de la siguiente compuerta llegan $0.5 + 0.4 = 0.9\ \text{V}$. Como $0.9\ \text{V} > V_{IL} = 0.8\ \text{V}$, la señal entra en la zona indefinida y el receptor **ya no garantiza** leer un `0`, de modo que el sistema puede fallar.
 
-1. **Agrupamiento:**  Se agrupa la cadena binaria desde la derecha hacia la izquierda en bloques de 4 bits para hexadecimal o de 3 bits para octal.  
-2. **Completado de ceros:**  Si el grupo del extremo izquierdo no completa la cantidad de bits requerida, se agregan ceros a la izquierda.  
-3. **Sustitución:**  Se reemplaza cada grupo por su símbolo equivalente en la base destino.
+Por eso el margen de nivel BAJO (0.3 V) es el más delicado de la familia 74LS.
 
-**Conversión del valor**  **\$157\_{10} \= 10011101\_2**\$  **:**
+---
 
-* **A Hexadecimal (grupos de 4 bits):**   \$\$1001 \\quad 1101\_2 \\longrightarrow 9 \\quad \\text{D}*{16} \\implies 9\\text{D}*{16}\$\$   *(Donde*  *\$1001\_2 \= 9*\$  *y*  *\$1101\_2 \= 13\_{10} \= \\text{D}*\$  *)*  
-* **A Octal (grupos de 3 bits):**   \$\$010 \\quad 011 \\quad 101\_2 \\longrightarrow 2 \\quad 3 \\quad 5\_8 \\implies 235\_8\$\$   *(Nótese la adición de un cero a la izquierda para completar el grupo de 3 bits:*  *\$010\_2 \= 2*\$  *,*  *\$011\_2 \= 3*\$  *,*  *\$101\_2 \= 5*\$  *)*
+## 2. Sistemas numéricos posicionales
 
-La estructuración de números positivos establece las bases de la cuantificación binaria, pero para procesar operaciones aritméticas completas es indispensable abordar la representación matemática de valores negativos en el hardware.
+En un sistema **posicional** el valor de cada dígito depende de su posición. En uno no posicional (por ejemplo, el romano) cada símbolo vale lo mismo en cualquier lugar. Un número de base $b$ se evalúa como suma de dígito × $b^{\text{posición}}$.
 
-#### 3\. Aritmética Binaria y Representación con Signo (Complemento a Dos)
+### 2.1 Sistema binario
 
-En los circuitos digitales físicos no existe un símbolo " \$-\$ " (menos) ni un componente electrónico para almacenarlo. Todo dato debe codificarse utilizando exclusivamente los estados discretos  \$0\$  y  \$1\$ . Por este motivo, se adopta el estándar de  **Complemento a Dos** , un convenio matemático que permite representar enteros con signo dentro de un ancho de palabra fijo y realizar operaciones de resta utilizando la misma estructura del sumador.
+- **Base 2**, símbolos $\{0, 1\}$.
+- **Bit** (*binary digit*): unidad mínima de información. **Nibble:** 4 bits. **Byte:** 8 bits.
+- **LSB:** bit menos significativo (derecha). **MSB:** bit más significativo (izquierda).
 
-##### Reglas de la Suma Binaria
+| Potencia | $2^7$ | $2^6$ | $2^5$ | $2^4$ | $2^3$ | $2^2$ | $2^1$ | $2^0$ |
+|---|---|---|---|---|---|---|---|---|
+| Peso | 128 | 64 | 32 | 16 | 8 | 4 | 2 | 1 |
 
-La adición binaria sigue los principios de la aritmética posicional, generando unidades de acarreo ( *carry* ) hacia la columna superior inmediata cuando el resultado excede la base.  
-Combinación,Resultado,Acarreo ( Carry )  
-\$0 \+ 0\$,\$0\$,0  
-\$0 \+ 1\$,\$1\$,0  
-\$1 \+ 0\$,\$1\$,0  
-\$1 \+ 1\$,\$0\$,"1 (resultado ""10"")"  
-\$1 \+ 1 \+ 1\$,\$1\$,"1 (resultado ""11"")"  
-**Demostración de adición con acarreo (**  **\$11\_{10} \+ 6\_{10} \= 17\_{10}**\$  **):**  \\begin{array}{rccccc} & 1 & 1 & 1 & & \\text{(Acarreos)} \\ & 1 & 0 & 1 & 1\_2 & (11) \\
+**Binario a decimal:**
 
-* & 0 & 1 & 1 & 0\_2 & (6) \\ \\hline \\mathbf{1} & \\mathbf{0} & \\mathbf{0} & \\mathbf{0} & \\mathbf{1}\_2 & (\\mathbf{17}) \\end{array}
+$$1011_2 = 1\cdot2^3 + 0\cdot2^2 + 1\cdot2^1 + 1\cdot2^0 = 8 + 0 + 2 + 1 = 11_{10}$$
 
-##### Mecánica del Complemento a Dos
+### 2.2 Decimal a binario (divisiones sucesivas)
 
-Para calcular el equivalente negativo de un número en Complemento a Dos, se aplica un procedimiento de dos pasos fundamentales:
+Se divide entre 2 hasta llegar a cociente 0. Los **residuos** se leen **de abajo hacia arriba**.
 
-1. **Inversión lógica (Complemento a Uno):**  Cambiar todos los ceros por unos y los unos por ceros.  
-2. **Suma de la unidad:**  Adicionar  \$1\$  al valor invertido.
+**Ejemplo: $25_{10}$**
 
-**Ejemplo para 4 bits (Obtener**  **\$-3\_{10}**\$  **a partir de**  **\$+3\_{10}**\$  **):**
+| División | Cociente | Residuo |
+|---|---|---|
+| $25 \div 2$ | 12 | **1** (LSB) |
+| $12 \div 2$ | 6 | 0 |
+| $6 \div 2$ | 3 | 0 |
+| $3 \div 2$ | 1 | 1 |
+| $1 \div 2$ | 0 | **1** (MSB) |
 
-* Representación de  \$+3\_{10}\$  en 4 bits: 0011  
-* Complemento a uno (invertir bits): 1100  
-* Sumar 1: 1100 \+ 0001 \= 1101 (Representación binaria de  \$-3\_{10}\$ )
+$$25_{10} = 11001_2 \qquad \text{Comprobación: } 16 + 8 + 1 = 25$$
 
-###### *Rangos de Representación*
+### 2.3 Hexadecimal y octal como abreviaturas del binario
 
-El bit ubicado en el extremo izquierdo (Bit Más Significativo o MSB) actúa como indicador de signo: un  **\$0**\$  indica un número positivo y un  **\$1**\$  indica un número negativo. Para una longitud de palabra de  \$n\$  bits, el rango dinámico representable se define como  \$-2^{n-1}, \+2^{n-1} \- 1\$ :
+Como $16 = 2^4$ y $8 = 2^3$, un dígito hexadecimal resume exactamente **4 bits** y uno octal resume **3 bits**.
 
-* **Para 4 bits (**  **\$n=4**\$  **):**  Rango de  \$-8\$  a  \$+7\$ .  
-* **Para 8 bits (**  **\$n=8**\$  **):**  Rango de  \$-128\$  a  \$+127\$ .
+| Decimal | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Binario | 0000 | 0001 | 0010 | 0011 | 0100 | 0101 | 0110 | 0111 | 1000 | 1001 | 1010 | 1011 | 1100 | 1101 | 1110 | 1111 |
+| Hexadecimal | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | A | B | C | D | E | F |
 
-Código (4 bits),Valor Decimal,Código (4 bits),Valor Decimal  
-0000,0,1000,\$-8\$  
-0001,\$+1\$,1001,\$-7\$  
-0010,\$+2\$,1010,\$-6\$  
-0011,\$+3\$,1011,\$-5\$  
-0100,\$+4\$,1100,\$-4\$  
-0101,\$+5\$,1101,\$-3\$  
-0110,\$+6\$,1110,\$-2\$  
-0111,\$+7\$,1111,\$-1\$  
-**Ventaja de Hardware:**  La principal ventaja de este sistema es que elimina la necesidad de implementar un circuito restador independiente. La resta  \$A \- B\$  se computa mediante la suma  \$A \+ (-B)\$ . Cualquier bit sobrante de acarreo que supere el ancho de palabra a la izquierda se descarta automáticamente.  
-*Demostración de resta (*  *\$5 \- 3 \= 2*\$  *en 4 bits):*  \\begin{array}{rcl} 0101\_2 & (+5) \\
+**Procedimiento:**
 
-* \\quad 1101\_2 & (-3) \\ \\hline \\mathbf{1} , 0010\_2 & \\longrightarrow \\text{El acarreo del MSB se descarta } \\implies \\mathbf{0010\_2} \= \+2\_{10} \\quad \\checkmark \\end{array}
+1. Agrupar los bits **de derecha a izquierda** (de 4 en 4 para hex, de 3 en 3 para octal).
+2. Completar con ceros a la izquierda el último grupo si hace falta.
+3. Sustituir cada grupo por su símbolo.
 
-##### Evaluación del Desbordamiento ( *Overflow* )
+**Ejemplo: $157_{10} = 10011101_2$**
 
-El fenómeno de desbordamiento ( *overflow* ) ocurre cuando el resultado de una operación aritmética supera los límites lógicos del rango dinámico permitido por el ancho de bits. En estas circunstancias, el bit de signo se corrompe y produce una interpretación numéricamente errónea.  
-**Ejemplo de desbordamiento en 4 bits (**  **\$7 \+ 1**\$  **):**  \\begin{array}{rcl} 0111\_2 & (+7) \\
+- Hexadecimal: `1001 | 1101` → `9 | D` → $9\text{D}_{16}$
+- Octal: `010 | 011 | 101` → `2 | 3 | 5` → $235_8$ (se añadió un cero a la izquierda)
 
-* \\quad 0001\_2 & (+1) \\ \\hline \\mathbf{1000\_2} & \\longrightarrow \\text{Representa } \\mathbf{-8} \\text{ en Complemento a Dos} \\quad \\boldsymbol{\\times} \\end{array}
+Comprobación: $9\cdot16 + 13 = 157$ y $2\cdot64 + 3\cdot8 + 5 = 157$.
 
-La adición de dos valores positivos generó un resultado negativo debido a que  \$+8\$  no cabe en el rango dinámico de 4 bits (cuyo máximo es  \$+7\$ ).  
-**Conexión con la Arquitectura de Software:**  
-Este comportamiento a nivel de hardware se traslada directamente a los lenguajes de programación de alto nivel (como Java o C) que utilizan enteros con signo en complemento a dos de 32 bits (int, con rango de  \$-2147483648\$  a  \$+2147483647\$ ). Al sobrepasar el límite máximo positivo, la variable sufre un desbordamiento idéntico al de 4 bits:  
-int x \= 2147483647;  
-x \= x \+ 1; // x pasa a valer \-2147483648 debido al desbordamiento en hardware
+---
 
-La representación numérico-aritmética se complementa con códigos de propósito específico diseñados para optimizar interfaces físicas y la transmisión de datos.
+## 3. Aritmética binaria y complemento a dos
 
-#### 4\. Códigos de Representación de Información: BCD, Gray y ASCII
+### 3.1 Suma binaria
 
-Además de los sistemas posicionales puros, la ingeniería de computadores emplea codificaciones binarias especializadas para resolver requerimientos de la interfaz hombre-máquina, lectura de sensores mecánicos y procesamiento de texto.
+| Operación | Suma | Acarreo |
+|---|---|---|
+| $0+0$ | 0 | 0 |
+| $0+1$ | 1 | 0 |
+| $1+0$ | 1 | 0 |
+| $1+1$ | 0 | 1 |
+| $1+1+1$ | 1 | 1 |
 
-##### Análisis Comparativo de Códigos Especializados
+**Ejemplo: $11 + 6 = 17$**
 
-###### *1\. Código BCD (Decimal Codificado en Binario / BCD 8421\)*
+```text
+ acarreos:  1 1 1
+              1 0 1 1   (11)
+          +   0 1 1 0   (6)
+          ───────────
+            1 0 0 0 1   (17)
+```
 
-El código BCD representa cada dígito de un número decimal ( \$0\$  al  \$9\$ ) de forma independiente mediante un grupo de 4 bits binarios.
+### 3.2 Complemento a dos
 
-* **Propósito:**  Interfaz directa con pantallas de cristal líquido, displays numéricos de 7 segmentos, calculadoras y contadores.  
-* **Combinaciones no válidas:**  Dado que un dígito decimal no excede el valor  \$9\$ , las secuencias binarias de  \$1010\_2\$  ( \$10\_{10}\$ ) a  \$1111\_2\$  ( \$15\_{10}\$ )  **son inválidas**  en BCD.
+El hardware no tiene un símbolo "−"; todo se codifica con `0` y `1`. El **complemento a dos** representa enteros con signo en un ancho de palabra fijo y permite **restar usando el mismo sumador**.
 
-*Comparación de la representación del número*  *\$157\_{10}*\$  *:*
+**Para obtener el negativo de un número:**
 
-* **Binario Puro:**   \$157\_{10} \= 10011101\_2\$  
-* **BCD Natural:**   \$157\_{10} \= \\underbrace{0001}*{1} \\quad \\underbrace{0101}*{5} \\quad \\underbrace{0111}*{7}*{\\text{ BCD}}\$
+1. **Invertir** todos los bits (complemento a uno).
+2. **Sumar 1**.
 
-###### *2\. Código Gray*
+**Ejemplo (4 bits): obtener $-3$ desde $+3$**
 
-El código Gray es una codificación no ponderada en la que dos números consecutivos adyacentes difieren en la posición de  **un solo bit** , independientemente del tamaño de la palabra.  
-**Análisis de Transición:**  En el sistema binario natural, al pasar del valor decimal  \$3\$  (011) al  \$4\$  (100),  **los tres bits cambian de estado simultáneamente** . En un sensor rotativo mecánico o encoder óptico de alta velocidad, las imperfecciones de fabricación impiden que los 3 transistores o fotodiodos conmuten al mismo instante exacto. Si un bit conmuta antes que los demás, el sensor reportará transitoriamente valores erróneos (por ejemplo, 011  \$\\rightarrow\$  001  \$\\rightarrow\$  100). En cambio, en el código Gray la misma transición del  \$3\$  al  \$4\$  modifica únicamente un bit (011  \$\\rightarrow\$  010), eliminando por completo los fallos de lectura espurios.  
-Decimal,Binario Natural,Código Gray,Transición Gray  
-0,000,000,-  
-1,001,001,Cambia bit 0  
-2,010,011,Cambia bit 1  
-3,011,010,Cambia bit 0  
-4,100,110,Cambia bit 2
+```text
++3        = 0011
+invertir  = 1100
+sumar 1   = 1100 + 0001 = 1101   →  -3
+```
 
-* **Generación por Reflejo (Espejo):**  Se construye duplicando en orden inverso la secuencia de 1 bit, anteponiendo ceros a la mitad superior y unos a la inferior. Esta adyacencia de 1 bit es la base metodológica para la ordenación geométrica de las variables en los Mapas de Karnaugh.
+> **Atajo:** recorriendo desde la derecha, se copian los bits hasta el primer `1` inclusive y se invierten todos los demás. Para `0011`: se copia `1` y se invierten `001` → `1101`. ✔
 
-###### *3\. Código ASCII ( American Standard Code for Information Interchange )*
+**Otro ejemplo (8 bits): $-5$.** $5 = 00000101$ → invertido `11111010` → $+1$ = `11111011`.
 
-El código ASCII representa caracteres alfanuméricos y comandos de control digital mediante una estructura estandarizada de  **7 bits** , ofreciendo  \$2^7 \= 128\$  combinaciones.
+### 3.3 Rango de representación
 
-* **Almacenamiento en hardware:**  Cuando un sistema capta la tecla  **'A'** , la memoria almacena el entero  \$65\_{10}\$ , equivalente a  \$41\_{16}\$  o en binario al byte  \$01000001\_2\$ .  
-* **Limitación Regional:**  Al estar restringido a 128 posiciones, el ASCII estándar excluye símbolos regionales como la 'ñ' o las tildes, motivando el uso de estándares extendidos como UTF-8 en software moderno.
+El MSB funciona como **bit de signo**: `0` es positivo y `1` es negativo. Con $n$ bits el rango es:
 
-Comprendidas las diversas representaciones de datos, corresponde analizar la estructura de los dispositivos encargados de su procesamiento lógico elemental: las compuertas lógicas.
+$$-2^{\,n-1} \ \le\ N\ \le\ +2^{\,n-1} - 1$$
 
-#### 5\. Compuertas Lógicas Fundamentales y Estándares de Simbología
+| $n$ | Rango |
+|---|---|
+| 4 bits | $-8$ a $+7$ |
+| 8 bits | $-128$ a $+127$ |
 
-Las compuertas lógicas son los bloques constitutivos básicos de la electrónica combinacional. Implementan las funciones fundamentales del Álgebra de Boole, evaluando una o más entradas para producir una única salida lógica de acuerdo con reglas estrictas de operación.
+| Código | Valor | Código | Valor |
+|---|---|---|---|
+| 0000 | 0 | 1000 | −8 |
+| 0001 | +1 | 1001 | −7 |
+| 0010 | +2 | 1010 | −6 |
+| 0011 | +3 | 1011 | −5 |
+| 0100 | +4 | 1100 | −4 |
+| 0101 | +5 | 1101 | −3 |
+| 0110 | +6 | 1110 | −2 |
+| 0111 | +7 | 1111 | −1 |
 
-##### Síntesis Teórica y Tablas de Verdad de las 7 Compuertas Lógicas
+Observación: el rango es **asimétrico** (hay un negativo más que positivos) y existe un único cero.
 
-###### *Compuertas Básicas*
+### 3.4 Resta como suma
 
-###### *1\. NOT (Inversor)*
+La resta $A - B$ se calcula como $A + (-B)$. El acarreo que sale por el MSB se **descarta**. Así no hace falta un circuito restador independiente: basta el sumador más la lógica que forma $-B$.
 
-Realiza el complemento lógico de la entrada.
+**Ejemplo: $5 - 3 = 2$ (4 bits)**
 
-* **Expresión Booleana:**   \$Y \= A'\$
+```text
+   0101   (+5)
+ + 1101   (-3)
+ ──────
+ 1 0010   → se descarta el acarreo del MSB → 0010 = +2  ✔
+```
 
-\$A\$,\$Y\$  
-0,1  
-1,0
+### 3.5 Desbordamiento (*overflow*)
 
-###### *2\. AND (Multiplicación Lógica)*
+Ocurre cuando el resultado **no cabe** en el rango del ancho de palabra: el bit de signo se corrompe y el resultado es erróneo.
 
-La salida toma el valor  \$1\$   **únicamente si todas**  sus entradas están en nivel ALTO.
+**Ejemplo (4 bits): $7 + 1$**
 
-* **Expresión Booleana:**   \$Y \= A \\cdot B\$
+```text
+   0111   (+7)
+ + 0001   (+1)
+ ──────
+   1000   → se interpreta como -8  ✘  (+8 no cabe en 4 bits)
+```
 
-\$A\$,\$B\$,\$Y\$  
-0,0,0  
-0,1,0  
-1,0,0  
-1,1,1
+**Criterio de detección:** hay overflow cuando se suman dos números del **mismo signo** y el resultado tiene **signo distinto**. (Sumar números de signo opuesto nunca produce overflow.) Equivale a que el acarreo que **entra** al MSB sea distinto del que **sale** de él. En $7+1$ entra un acarreo al MSB y no sale ninguno (overflow); en $5-3$ entra uno y sale uno (sin overflow).
 
-###### *3\. OR (Suma Lógica)*
+> **Conexión con software.** Los enteros con signo de 32 bits (`int` en C o Java, rango $-2\,147\,483\,648$ a $+2\,147\,483\,647$) se comportan igual:
+>
+> ```java
+> int x = 2147483647;
+> x = x + 1;   // x pasa a valer -2147483648 por desbordamiento
+> ```
 
-La salida toma el valor  \$1\$  si  **al menos una**  de sus entradas está en nivel ALTO.
+---
 
-* **Expresión Booleana:**   \$Y \= A \+ B\$
+## 4. Códigos de representación: BCD, Gray y ASCII
 
-\$A\$,\$B\$,\$Y\$  
-0,0,0  
-0,1,1  
-1,0,1  
-1,1,1
+Un **código** es una convención para asignar patrones de bits a información. No todos son numéricos ni ponderados.
 
-###### *Compuertas Negadas*
+### 4.1 BCD (Decimal Codificado en Binario, 8421)
 
-###### *4\. NAND (NOT-AND)*
+Cada **dígito decimal** (0 a 9) se codifica por separado con 4 bits.
 
-Produce la inversión de una compuerta AND. La salida es  \$0\$   **únicamente si todas**  las entradas están en nivel ALTO.
+- **Uso:** interfaz con displays de 7 segmentos, calculadoras y contadores decimales.
+- **Combinaciones inválidas:** $1010_2$ a $1111_2$ (10 a 15) **no representan ningún dígito**. Son 6 de las 16 combinaciones posibles; más adelante se tratarán como condiciones de "no importa".
 
-* **Expresión Booleana:**   \$Y \= (A \\cdot B)'\$
+**Comparación con $157_{10}$:**
 
-\$A\$,\$B\$,\$Y\$  
-0,0,1  
-0,1,1  
-1,0,1  
-1,1,0
+| Representación | Resultado |
+|---|---|
+| Binario puro | `10011101` (8 bits) |
+| BCD | `0001 0101 0111` (12 bits: dígitos 1, 5, 7) |
 
-###### *5\. NOR (NOT-OR)*
+BCD usa más bits, pero convertir a visualización decimal es inmediato. **No debe confundirse con el binario puro**: $0001\,0101\,0111_{\text{BCD}} \neq 10011101_2$.
 
-Produce la inversión de una compuerta OR. La salida es  \$1\$   **únicamente si ninguna**  de sus entradas está activa ( \$0\$ ).
+### 4.2 Código Gray
 
-* **Expresión Booleana:**   \$Y \= (A \+ B)'\$
+Código **no ponderado** en el que dos valores consecutivos difieren en **un solo bit**.
 
-\$A\$,\$B\$,\$Y\$  
-0,0,1  
-0,1,0  
-1,0,0  
-1,1,0
+**Problema que resuelve.** En binario natural, pasar de 3 (`011`) a 4 (`100`) cambia **los tres bits a la vez**. En un encoder rotativo real los sensores no conmutan en el mismo instante, así que durante la transición pueden leerse valores falsos (*glitches*), por ejemplo `011 → 001 → 100`. Con Gray, de 3 (`010`) a 4 (`110`) cambia **solo un bit** y el error de lectura espurio no puede ocurrir.
 
-###### *Compuertas de Comparación*
+| Decimal | Binario natural | Código Gray | Bit que cambia respecto al anterior |
+|---|---|---|---|
+| 0 | 000 | 000 | — |
+| 1 | 001 | 001 | bit 0 |
+| 2 | 010 | 011 | bit 1 |
+| 3 | 011 | 010 | bit 0 |
+| 4 | 100 | 110 | bit 2 |
+| 5 | 101 | 111 | bit 0 |
+| 6 | 110 | 101 | bit 1 |
+| 7 | 111 | 100 | bit 0 |
 
-###### *6\. XOR (OR Exclusiva)*
+**Construcción por reflejo (espejo):**
 
-La salida es  \$1\$   **si las entradas son distintas**  entre sí.
+```text
+1 bit:      0 1
+reflejar:   0 1 | 1 0
+prefijar:   00 01 | 11 10          ← secuencia de 2 bits: 00, 01, 11, 10
+reflejar:   00 01 11 10 | 10 11 01 00
+prefijar:   000 001 011 010 | 110 111 101 100   ← secuencia de 3 bits
+```
 
-* **Expresión Booleana:**   \$Y \= A \\oplus B\$  
-* **Aplicación física:**  Conmutador de luz de escalera (dos interruptores independientes donde cambiar la posición de cualquiera invierte el estado de la lámpara).
+Se antepone `0` a la primera mitad y `1` a la mitad reflejada.
 
-\$A\$,\$B\$,\$Y\$  
-0,0,0  
-0,1,1  
-1,0,1  
-1,1,0
+**Conversión por fórmula** (usa la operación XOR, $\oplus$, que se define en la sección 5):
 
-###### *7\. XNOR (Equivalencia / NOR Exclusiva)*
+- Binario → Gray: $g_{n-1} = b_{n-1}$ y $g_i = b_{i+1} \oplus b_i$. Ejemplo: $100_2 \to 100 \oplus 010 = 110_{\text{Gray}}$.
+- Gray → Binario: $b_{n-1} = g_{n-1}$ y $b_i = b_{i+1} \oplus g_i$.
 
-La salida es  \$1\$   **si las entradas son iguales**  entre sí.
+> La secuencia `00, 01, 11, 10` es justamente el orden en que se rotulan filas y columnas de los **Mapas de Karnaugh**, que se estudiarán más adelante.
 
-* **Expresión Booleana:**   \$Y \= (A \\oplus B)'\$
+### 4.3 ASCII (*American Standard Code for Information Interchange*)
 
-\$A\$,\$B\$,\$Y\$  
-0,0,1  
-0,1,0  
-1,0,0  
-1,1,1
+Codifica caracteres alfanuméricos y comandos de control con **7 bits** ($2^7 = 128$ combinaciones), almacenados normalmente en un byte.
 
-##### Comparativa de Estándares de Simbología
+| Carácter | Decimal | Hex | Binario (8 bits) |
+|---|---|---|---|
+| `0` | 48 | 30 | 00110000 |
+| `A` | 65 | 41 | 01000001 |
+| `a` | 97 | 61 | 01100001 |
 
-Existen dos normativas internacionales diferenciadas para la representación gráfica de las compuertas lógicas en esquemas de diseño:
+- Una letra minúscula se diferencia de su mayúscula en un solo bit (el de peso 32).
+- Al tener solo 128 posiciones, el ASCII estándar **no incluye** la "ñ" ni las tildes. Para eso existen extensiones como **UTF-8**.
 
-* **Norma ANSI/IEEE Standard 91-1984:**  Emplea  **formas distintivas**  características (entrada plana y curva posterior para AND; forma arqueada en punta para OR). Es el estándar primario utilizado en el desarrollo de la asignatura.  
-* **Norma IEC 60617-12 (International Electrotechnical Commission):**  Emplea  **bloques rectangulares**  uniformes con símbolos internos descriptivos:  
-* **NOT:**  Rectángulo con el símbolo 1 y un  **burbuja/círculo de negación**  en la terminal de salida.  
-* **AND / NAND:**  Rectángulo con el símbolo &. La compuerta NAND mantiene el símbolo & pero añade la  **burbuja de negación**  a la salida.  
-* **OR / NOR:**  Rectángulo con el símbolo ≥1. La compuerta NOR añade la  **burbuja de negación**  a la salida.  
-* **XOR / XNOR:**  Rectángulo con el símbolo \=1. La compuerta XNOR añade la  **burbuja de negación**  a la salida.
+### 4.4 Resumen comparativo
 
-Estas construcciones lógicas abstractas se materializan en circuitos integrados reales, cuya arquitectura debe identificarse mediante hojas de datos.
+| Código | Ponderado | Bits | Aplicación principal |
+|---|---|---|---|
+| Binario natural | Sí | $n$ | Aritmética |
+| BCD | Sí (8-4-2-1) | 4 por dígito | Displays y contadores decimales |
+| Gray | No | $n$ | Encoders y sensores de posición |
+| ASCII | No | 7 | Texto y caracteres de control |
 
-#### 6\. Integración Física y Lectura de Hojas de Datos (Serie 74LS08)
+---
 
-La implementación física de las compuertas lógicas se realiza mediante circuitos integrados (chips) de la familia 74\. La correcta integración de estos componentes exige la interpretación técnica de las hojas de datos ( *datasheets* ) comerciales y el conocimiento formal de la geometría de sus encapsulados.
+## 5. Compuertas lógicas fundamentales
 
-##### Arquitectura del Encapsulado DIP-14
+Las compuertas son los bloques básicos de la electrónica digital. Implementan las funciones del álgebra de Boole: reciben una o más entradas lógicas y producen **una** salida según una regla fija.
 
-El tipo de encapsulado estándar para pruebas en laboratorio es el  **DIP-14**  ( *Dual In-line Package*  de 14 pines), compuesto por dos filas paralelas de 7 pines con un espaciado regular de 0.1 pulgadas.  
-                  \+---U---+  
-         1A \-- 1 \|1     14\| \-- VCC (+5V)  
-         1B \-- 2 \|2     13\| \-- 4B  
-         1Y \-- 3 \|3     12\| \-- 4A  
-         2A \-- 4 \|4     11\| \-- 4Y  
-         2B \-- 5 \|5     10\| \-- 3B  
-         2Y \-- 6 \|6      9\| \-- 3A  
-   (GND) 0V \-- 7 \|7      8\| \-- 3Y  
-                 \+--------+  
-         CI 74LS08 (Cuádruple AND)
+### 5.1 Compuerta NOT (inversor)
 
-###### *Convención para el Conteo e Identificación de Pines*
+Entrega el complemento de la entrada: $Y = A'$ (también $\overline{A}$).
 
-1. **Orientación:**  Se sostiene el integrado con la muesca semicircular de referencia apuntando hacia arriba.  
-2. **Pin 1:**  Se localiza en la esquina superior izquierda, contiguo a la muesca.  
-3. **Sentido de conteo:**  Se efectúa un recorrido en  **sentido antihorario** : los pines del 1 al 7 descienden por el costado izquierdo, el pin 8 se encuentra en el extremo inferior derecho, y los pines del 9 al 14 ascienden por el costado derecho.
+| $A$ | $Y$ |
+|---|---|
+| 0 | 1 |
+| 1 | 0 |
 
-###### *Asignación de Pines del 74LS08 (Cuádruple Compuerta AND de 2 Entradas)*
+### 5.2 Compuertas de dos entradas
 
-El chip contiene internamente cuatro compuertas AND independientes:
+| Compuerta | Expresión | Regla de la salida |
+|---|---|---|
+| **AND** | $Y = A \cdot B$ | Vale 1 **solo si todas** las entradas son 1 |
+| **OR** | $Y = A + B$ | Vale 1 si **al menos una** entrada es 1 |
+| **NAND** | $Y = (A \cdot B)'$ | AND invertida: vale 0 **solo si todas** las entradas son 1 |
+| **NOR** | $Y = (A + B)'$ | OR invertida: vale 1 **solo si ninguna** entrada es 1 |
+| **XOR** | $Y = A \oplus B$ | Vale 1 si las entradas son **distintas** |
+| **XNOR** | $Y = (A \oplus B)'$ | Vale 1 si las entradas son **iguales** |
 
-* **Alimentación Principal:**  
-* **Pin 14 (**  **\$V\_{CC}**\$  **):**  Alimentación positiva a  \$+5\\text{ V}\$ .  
-* **Pin 7 (**  **\$\\text{GND}**\$  **):**  Masa de referencia a  \$0\\text{ V}\$ .  
-* **Distribución de las 4 Compuertas:**  
-* Compuerta 1: Entradas en pines 1 (1A) y 2 (1B); Salida en pin 3 (1Y).  
-* Compuerta 2: Entradas en pines 4 (2A) y 5 (2B); Salida en pin 6 (2Y).  
-* Compuerta 3: Entradas en pines 9 (3A) y 10 (3B); Salida en pin 8 (3Y).  
-* Compuerta 4: Entradas en pines 12 (4A) y 13 (4B); Salida en pin 11 (4Y).
+**Tabla de verdad conjunta:**
 
-##### Decodificación de Códigos de Fabricante (Nomenclatura)
+| $A$ | $B$ | AND | OR | NAND | NOR | XOR | XNOR |
+|---|---|---|---|---|---|---|---|
+| 0 | 0 | 0 | 0 | 1 | 1 | 0 | 1 |
+| 0 | 1 | 0 | 1 | 1 | 0 | 1 | 0 |
+| 1 | 0 | 0 | 1 | 1 | 0 | 1 | 0 |
+| 1 | 1 | 1 | 1 | 0 | 0 | 0 | 1 |
 
-Los códigos comerciales impresos en el encapsulado obedecen a un estándar estructural estricto. Tomando como ejemplo la serie comercial  **SN 74 LS 08 N** :
+**Notas útiles:**
 
-* **SN**  **(Prefijo de Fabricante):**  Identifica a la firma fabricante (SN corresponde a Texas Instruments).  
-* **74**  **(Rango de Aplicación y Temperatura):**  Indica el rango comercial de operabilidad ( \$0^\\circ\\text{C}\$  a  \$70^\\circ\\text{C}\$ ). El prefijo 54 se reserva para grado militar ( \$-55^\\circ\\text{C}\$  a  \$125^\\circ\\text{C}\$ ).  
-* **LS**  **(Tecnología y Familia Lógica):**  Define la tecnología de construcción interna. LS indica  *Low-power Schottky*  (tecnología bipolar TTL de bajo consumo y alta velocidad). En caso de presentarse la sigla HC ( *High-speed CMOS* ), la función y la disposición de pines se mantienen idénticas, pero la variante pertenece a la tecnología CMOS de menor consumo estático.  
-* **08**  **(Identificador Funcional):**  Designa la función lógica interna (cuatro compuertas AND de 2 entradas).  
-* **N**  **(Tipo de Encapsulado Físico):**  Especifica el formato del empaque. La letra N representa el encapsulado DIP plástico para inserción en placa o protoboard ( *Through-Hole* ).
+- **XOR** funciona como un **detector de diferencia** (por eso se usa en comparadores) y equivale a una suma módulo 2. Ejemplo físico: la luz de una escalera con dos interruptores, donde cambiar cualquiera invierte el estado de la lámpara.
+- **XNOR** es un **detector de igualdad**.
+- Con más de dos entradas, AND y OR siguen las mismas reglas (todas en 1 / al menos una en 1).
+- **NAND** y **NOR** se llaman **universales**: cualquier circuito combinacional puede construirse usando solo uno de los dos tipos.
 
-##### Resumen Sintético de la Semana 1
+### 5.3 Normas de simbología
 
-Durante esta unidad temática se han consolidado los cimientos operativos del hardware digital:
+| Norma | Representación | Característica |
+|---|---|---|
+| **ANSI/IEEE Std 91-1984** | Formas distintivas | AND: entrada plana y salida curva. OR: entrada curva y salida en punta. Es la que se usa en esta asignatura |
+| **IEC 60617-12** | Rectángulos con un símbolo interno | NOT: `1`. AND/NAND: `&`. OR/NOR: `≥1`. XOR/XNOR: `=1` |
 
-1. La abstracción física del voltaje en estados discretos ( \$0\$  y  \$1\$ ) delimitados por rangos operacionales ( \$V\_{OH}, V\_{IH}, V\_{IL}, V\_{OL}\$ ) y márgenes de ruido ( \$0.7\\text{ V}\$  en ALTO y  \$0.3\\text{ V}\$  en BAJO en la familia 74LS).  
-2. Los métodos de conversión y representación en sistemas posicionales binario, octal y hexadecimal.  
-3. El cálculo de resta y la codificación de números negativos mediante  **Complemento a Dos** , así como el análisis del desbordamiento ( *overflow* ) en hardware y su manifestación en lenguajes de alto nivel.  
-4. Las aplicaciones de los códigos de interfaz  **BCD**  (para displays),  **Gray**  (adyacencia de 1 bit para encoders y Mapas de Karnaugh) y  **ASCII**  (para texto).  
-5. La formalización teórica, tablas de verdad y comparación de estándares gráficos (ANSI/IEEE e IEC) de las 7 compuertas lógicas.  
-6. La arquitectura del encapsulado DIP-14 y el patillaje del circuito integrado  **74LS08** .
+En ambas normas, la inversión (NOT, NAND, NOR, XNOR) se marca con una **burbuja** (círculo de negación) en la terminal de salida.
 
-Este marco conceptual establece la base requerida para abordar en la Semana 2 el  **Álgebra de Boole, los Axiomas de Huntington y la obtención formal de Formas Canónicas**  (SOP y POS).  
+---
+
+## 6. Circuitos integrados y hojas de datos (serie 74LS08)
+
+Las compuertas se materializan en **circuitos integrados** (chips) de la familia 74. Para usarlos hay que saber leer su *datasheet* y conocer la geometría del encapsulado.
+
+### 6.1 Encapsulado DIP-14
+
+*Dual In-line Package* de 14 pines: dos filas paralelas de 7 pines separados 0.1 pulgadas (compatible con protoboard).
+
+```text
+                 ┌───╮ ╭───┐   (muesca)
+        1A  ──  1 │       │ 14 ──  VCC (+5 V)
+        1B  ──  2 │       │ 13 ──  4B
+        1Y  ──  3 │       │ 12 ──  4A
+        2A  ──  4 │ 74LS08│ 11 ──  4Y
+        2B  ──  5 │       │ 10 ──  3B
+        2Y  ──  6 │       │  9 ──  3A
+  GND (0 V) ──  7 │       │  8 ──  3Y
+                  └───────┘
+              Cuádruple AND de 2 entradas
+```
+
+**Cómo contar los pines:**
+
+1. Sostener el chip con la **muesca** semicircular hacia arriba.
+2. El **pin 1** está en la esquina superior izquierda, junto a la muesca.
+3. Se cuenta en **sentido antihorario**: del 1 al 7 bajando por la izquierda; del 8 al 14 subiendo por la derecha.
+
+### 6.2 Asignación de pines del 74LS08
+
+| Función | Pines |
+|---|---|
+| Alimentación $V_{CC}$ (+5 V) | 14 |
+| Tierra GND (0 V) | 7 |
+| Compuerta 1 | Entradas 1 y 2, salida 3 |
+| Compuerta 2 | Entradas 4 y 5, salida 6 |
+| Compuerta 3 | Entradas 9 y 10, salida 8 |
+| Compuerta 4 | Entradas 12 y 13, salida 11 |
+
+**Buenas prácticas de conexión:**
+
+- Alimentar siempre $V_{CC}$ y GND. La familia 74LS opera con $+5\ \text{V}$ (aprox. 4.75 V a 5.25 V).
+- **No dejar entradas sin conectar:** llevar las entradas sobrantes a `0` o `1` definido (GND, o $V_{CC}$ mediante una resistencia).
+- Si una compuerta del chip no se usa, sus **entradas** también deben quedar en un nivel definido (su salida puede dejarse libre).
+
+### 6.3 Otros chips de compuertas de uso común
+
+| Circuito | Contenido | Observación de pines |
+|---|---|---|
+| 74LS00 | 4 NAND de 2 entradas | Mismo patillaje que el 74LS08 |
+| 74LS02 | 4 NOR de 2 entradas | **Distinto**: las salidas están en los pines 1, 4, 10 y 13 |
+| 74LS04 | 6 NOT (inversores) | Distinto: una entrada y una salida por compuerta |
+| 74LS08 | 4 AND de 2 entradas | Referencia de esta semana |
+| 74LS32 | 4 OR de 2 entradas | Mismo patillaje que el 74LS08 |
+| 74LS86 | 4 XOR de 2 entradas | Mismo patillaje que el 74LS08 |
+
+> Siempre se debe verificar el patillaje en el *datasheet* del chip concreto: no todos los chips comparten la distribución del 74LS08.
+
+### 6.4 Nomenclatura del fabricante
+
+Ejemplo: **SN 74 LS 08 N**
+
+| Código | Significado |
+|---|---|
+| **SN** | Prefijo del fabricante (Texas Instruments) |
+| **74** | Rango comercial de temperatura: 0 °C a 70 °C. El prefijo **54** es de grado militar (−55 °C a 125 °C) |
+| **LS** | Tecnología: *Low-power Schottky* (bipolar TTL de bajo consumo y buena velocidad). Con **HC** (*High-speed CMOS*) la función y los pines se mantienen, pero la tecnología es CMOS, de menor consumo estático |
+| **08** | Función lógica: cuatro AND de 2 entradas |
+| **N** | Encapsulado: DIP plástico de inserción (*through-hole*) |
+
+---
+
+## Resumen de la semana
+
+1. Los voltajes se abstraen en dos estados, delimitados por $V_{OH}$, $V_{IH}$, $V_{IL}$ y $V_{OL}$. En 74LS los márgenes de ruido son **0.7 V** (ALTO) y **0.3 V** (BAJO), y la franja de 0.8 V a 2.0 V es la zona indefinida.
+2. Las conversiones entre binario, decimal, octal y hexadecimal se hacen con pesos, divisiones sucesivas y agrupación de bits (4 para hex, 3 para octal).
+3. El **complemento a dos** (invertir y sumar 1) permite restar con un sumador. El rango es $-2^{n-1}$ a $2^{n-1}-1$ y el **overflow** aparece cuando dos operandos del mismo signo dan un resultado de signo contrario.
+4. **BCD** (dígito a dígito, 6 combinaciones inválidas), **Gray** (cambio de un solo bit entre valores consecutivos) y **ASCII** (texto en 7 bits) resuelven necesidades de interfaz.
+5. Las **7 compuertas** (NOT, AND, OR, NAND, NOR, XOR, XNOR) tienen tablas de verdad y símbolos ANSI/IEEE e IEC. NAND y NOR son universales.
+6. El **74LS08** es un DIP-14 con cuatro AND; $V_{CC}$ en el pin 14 y GND en el pin 7.
+
+---
+
+## Autoevaluación
+
+1. Convierta $202_{10}$ a binario y a hexadecimal.
+2. Represente $-6$ en complemento a dos con 4 bits.
+3. Calcule $6 + 5$ en 4 bits con signo. ¿Hay overflow?
+4. Convierta $101_2$ a código Gray.
+5. Una salida BAJA de $0.5\ \text{V}$ recibe $0.2\ \text{V}$ de ruido. ¿La entrada receptora lo lee correctamente? ¿Y con $0.4\ \text{V}$?
+
+<details>
+<summary>Ver respuestas</summary>
+
+1. $202 = 128 + 64 + 8 + 2 = 11001010_2$, que agrupado `1100 | 1010` da $\text{CA}_{16}$.
+2. $+6 = 0110$ → invertido `1001` → $+1$ = **1010**.
+3. $0110 + 0101 = 1011$, que se lee como $-5$. **Sí hay overflow**: dos positivos dieron un negativo ($+11$ no cabe en 4 bits).
+4. $101 \oplus 010 = $ **111** en Gray.
+5. Con $0.2\ \text{V}$: $0.7\ \text{V} \le 0.8\ \text{V}$, lectura correcta. Con $0.4\ \text{V}$: $0.9\ \text{V} > 0.8\ \text{V}$, zona indefinida, lectura no garantizada.
+
+</details>
+
+---
