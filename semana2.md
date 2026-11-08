@@ -1,199 +1,449 @@
-### APUNTES ACADÉMICOS INTEGRALES: SEMANA 2 \- ÁLGEBRA DE BOOLE Y FORMAS CANÓNICAS
+# Semana 2: Álgebra de Boole y Formas Canónicas
 
-* **Fecha:**  25 de Octubre de 2026
+**Asignatura:** Diseño de Circuitos · **Unidad 1:** Análisis de Lógica Combinacional con Diseño Clásico
 
-###### *1.2 Objetivos de Aprendizaje y Alcance Operativo (Semana 2\)*
+---
 
-* **Transformación Sistemática:**  Traducir requerimientos y especificaciones en enunciado verbal a representaciones formales unívocas mediante tablas de verdad.  
-* **Representación Canónica Dual:**  Formular e interpretar funciones lógicas a través de las representaciones canónicas de Suma de Productos ( \$\\text{SOP} / \\Sigma m\$ ) y Producto de Sumas ( \$\\text{POS} / \\Pi M\$ ).  
-* **Minimización Algebraica de Circuitos:**  Optimizar funciones booleanas complejas aplicando sistemáticamente los axiomas de Huntington, teoremas algebraicos y leyes de dualidad.
+## Objetivos de la semana
 
-La rigurosidad matemática del álgebra booleana permite mapear variables físicas y señales discrecionalmente modeladas a expresiones operativas optimizadas, garantizando la correcta síntesis de redes combinacionales.
+Al terminar esta semana se debe ser capaz de:
 
-##### 2\. FUNDAMENTOS TEÓRICOS: ÁLGEBRA DE BOOLE Y POSTULADOS DE HUNTINGTON
+- Expresar un circuito de compuertas como una expresión booleana y viceversa.
+- Aplicar los postulados, teoremas y el principio de dualidad del álgebra de Boole.
+- Usar las leyes de De Morgan para complementar expresiones.
+- Traducir un enunciado verbal a una tabla de verdad, detectando ambigüedades.
+- Escribir una función en sus formas canónicas **SOP** (suma de productos, $\Sigma m$) y **POS** (producto de sumas, $\Pi M$).
+- Simplificar funciones por vía algebraica para reducir compuertas y literales.
 
-La formalización del comportamiento discreto en los circuitos digitales descansa sobre un sistema algebraico definido en el conjunto  \$\\{0, 1\\}\$ , operado mediante tres funciones primitivas: la suma lógica ( \$\\text{OR}\$ ,  \$+\$ ), el producto lógico ( \$\\text{AND}\$ ,  \$\\cdot\$ ) y el complemento ( \$\\text{NOT}\$ ,  \$'\$ ). Los postulados de Huntington establecen la base axiomática que garantiza la coherencia en la manipulación simbólica de dichas variables. En el diseño de arquitecturas de hardware, observar la jerarquía de precedencia operacional resulta crítico: una alteración en el orden de evaluación distorsiona el árbol sintáctico de la función, derivando en un mapeo erróneo de las compuertas lógicas e induciendo estados indeterminados en los buses de salida.
+> **Conocimientos previos (Semana 1):** compuertas NOT, AND, OR, NAND, NOR, XOR, XNOR con sus tablas de verdad, el hecho de que NAND y NOR son universales, y la numeración binaria. Aquí se usan sin volver a explicarlos.
 
-###### *2.1 Mapeo Fundamental entre Circuitos Lógicos y Expresiones Algebraicas*
+---
 
-Existe un isomorfismo estructural directo entre los componentes físicos de una red combinacional y las variables o compuertas del modelo algebraico booleano:  
-Componente del Circuito Digital,Representación Matemática Booleana  
-Cable de entrada,"Variable ( \$A, B, C\$ )"  
-Compuerta  \$\\text{AND}\$,Producto ( \$\\cdot\$ )  
-Compuerta  \$\\text{OR}\$,Suma ( \$+\$ )  
-Compuerta  \$\\text{NOT}\$,Complemento ( \$'\$ )  
-Salida del circuito,Valor evaluado de la función ( \$Y\$  o  \$F\$ )  
-Para la correcta evaluación formal de expresiones booleanas y su posterior traducción a hardware, se establece la jerarquía estricta de precedencia operacional:  
-\$\$\\text{1º Operador NOT } (') \\longrightarrow \\text{2º Operador AND } (\\cdot) \\longrightarrow \\text{3º Operador OR } (+)\$\$
+## 1. Álgebra de Boole
 
-###### *2.2 Sistema Axiomático: Postulados de Huntington, Teoremas y Principio de Dualidad*
+Las especificaciones en lenguaje natural suelen ser ambiguas. El **álgebra de Boole** ofrece un modelo matemático exacto para describir el comportamiento de señales binarias y, a partir de él, diseñar y optimizar circuitos.
 
-El cálculo proposicional e inequívoco sobre el conjunto  \$\\{0, 1\\}\$  se estructura a través de los axiomas y teoremas de Huntington tabulados a continuación:  
-Nombre del Postulado / Teorema,Forma OR (Suma),Forma AND (Dual)  
-Identidad,\$X \+ 0 \= X\$,\$X \\cdot 1 \= X\$  
-Complemento,\$X \+ X' \= 1\$,\$X \\cdot X' \= 0\$  
-Conmutativa,\$X \+ Y \= Y \+ X\$,\$XY \= YX\$  
-Distributiva,\$X(Y \+ Z) \= XY \+ XZ\$,\$X \+ YZ \= (X \+ Y)(X \+ Z)\$  
-Elemento nulo,\$X \+ 1 \= 1\$,\$X \\cdot 0 \= 0\$  
-Idempotencia,\$X \+ X \= X\$,\$X \\cdot X \= X\$  
-Involución,\$(X')' \= X\$,—  
-Absorción,\$X \+ XY \= X\$,\$X(X \+ Y) \= X\$  
-Absorción del complemento,\$X \+ X'Y \= X \+ Y\$,\$X(X' \+ Y) \= XY\$  
-Adyacencia,\$XY \+ XY' \= X\$,\$(X \+ Y)(X \+ Y') \= X\$  
-Consenso,\$XY \+ X'Z \+ YZ \= XY \+ X'Z\$,\$(X+Y)(X'+Z)(Y+Z) \= (X+Y)(X'+Z)\$
+Se define sobre el conjunto $\{0, 1\}$ con tres operaciones:
 
-###### *Principio de Dualidad*
+| Operación | Símbolo | Compuerta |
+|---|---|---|
+| Suma lógica | $+$ | OR |
+| Producto lógico | $\cdot$ (o yuxtaposición: $XY$) | AND |
+| Complemento | $'$ (o barra superior) | NOT |
 
-El  **Principio de Dualidad**  sostiene que cualquier identidad algebraica booleana preserva su validez matemática si se reemplazan de manera simultánea los operadores de suma y producto ( \$+ \\leftrightarrow \\cdot\$ ), así como las identidades constantes ( \$0 \\leftrightarrow 1\$ ), manteniendo las variables lógicas en su forma original (sin aplicarles complemento).
+### 1.1 Correspondencia circuito ↔ expresión
 
-###### *2.3 Demostraciones Algebraicas Clave y Leyes de De Morgan*
+| Elemento del circuito | Elemento algebraico |
+|---|---|
+| Cable de entrada | Variable ($A$, $B$, $C$) |
+| Compuerta AND | Producto |
+| Compuerta OR | Suma |
+| Compuerta NOT | Complemento |
+| Salida | Valor de la función ($F$ o $Y$) |
 
-A partir de las reglas axiomáticas, es posible verificar identidades booleanas que difieren del álgebra convencional. A continuación se demuestra rigurosamente la ley distributiva especial de la suma sobre el producto:  \$A \+ BC \= (A \+ B)(A \+ C)\$ .  
-Partiendo de la expresión desplegada del miembro derecho:  
-\$\$\\text{Expresión de partida: } (A \+ B)(A \+ C)\$\$
+Cada expresión tiene un circuito directo, y cada circuito se puede leer como una expresión.
 
-1. Aplicación del postulado  **Distributivo** :  \$\$= AA \+ AC \+ AB \+ BC\$\$  
-2. Aplicación del teorema de  **Idempotencia**  ( \$AA \= A\$ ):  \$\$= A \+ AC \+ AB \+ BC\$\$  
-3. Factorización del literal común  \$A\$  mediante el postulado  **Distributivo** :  \$\$= A(1 \+ C \+ B) \+ BC\$\$  
-4. Aplicación del teorema del  **Elemento Nulo**  ( \$1 \+ C \+ B \= 1\$ ) e  **Identidad**  ( \$A \\cdot 1 \= A\$ ):  \$\$= A(1) \+ BC \= A \+ BC \\quad \\blacksquare\$\$
+**Ejemplo:** $F = A\,B' + C$ corresponde a una NOT sobre $B$, una AND con $A$ y una OR con $C$.
 
-###### *Leyes de De Morgan e Implementación con Compuertas Universales*
+```text
+ B ──▷o──┐
+         ├── AND ──┐
+ A ──────┘         ├── OR ── F
+ C ────────────────┘
+```
 
-Las  **Leyes de De Morgan**  formalizan la negación de expresiones compuestas mediante la regla operativa:  *"romper la barra de negación principal y cambiar el operador lógico central"* . Para un sistema de tres variables:  
-\$\$(A \\cdot B \\cdot C)' \= A' \+ B' \+ C'\$\$  
-\$\$(A \+ B \+ C)' \= A' \\cdot B' \\cdot C'\$\$  
-Desde la perspectiva de la ingeniería de la microelectrónica, las leyes de De Morgan constituyen la herramienta analítica fundamental para la transformación de bloques de lógica  \$\\text{AND-OR}\$  hacia topologías integradas basadas exclusivamente en compuertas  **NAND**  o  **NOR** . Dado que con compuertas  \$\\text{NAND}\$  (o únicamente  \$\\text{NOR}\$ ) es posible construir cualquier circuito combinacional (propiedad de universalidad), De Morgan permite a los diseñadores simplificar el proceso de fabricación en silicio y optimizar la disposición física de los transistores en la celda integrada.  
-Esta formalización matemática de reglas y transformaciones axiomáticas constituye la base analítica necesaria para abordar la interpretación de requerimientos lógicos en problemas reales de ingeniería.
+### 1.2 Precedencia de operadores
 
-##### 3\. ESPECIFICACIÓN LÓGICA Y CONSTRUCCIÓN DE TABLAS DE VERDAD
+Se evalúa primero lo que está entre **paréntesis** y luego, en este orden:
 
-El modelado de sistemas digitales requiere traducir especificaciones verbales hacia descripciones lógicas deterministas. El lenguaje natural presenta inconsistencias de interpretación; un sesgo en la lectura de un enunciado modifica la asignación de minitérminos en la tabla de verdad, alterando la función lógica y generando un circuito que no responde a los requerimientos de diseño.
+$$\text{NOT } (') \;\rightarrow\; \text{AND } (\cdot) \;\rightarrow\; \text{OR } (+)$$
 
-###### *3.1 Análisis de Ambigüedad en Enunciados: El Caso de la Sirena y Sensores*
+Por ejemplo, $A + B\,C'$ significa $A + \big(B \cdot (C')\big)$, que es distinto de $(A + B)\,C'$. Alterar la precedencia cambia el circuito resultante.
 
-Considere la especificación funcional:  *"La sirena suena cuando se activan dos sensores"* , implementada en un sistema de monitoreo con tres sensores discretos ( \$A, B, C\$ ). El enunciado admite dos interpretaciones lógicas distintas:  
-                  ┌─────────────────────────────────────────────────────────┐  
-                  │ ¿La sirena suena cuando se activan dos sensores?        │  
-                  └────────────────────────────┬────────────────────────────┘  
-                                               │  
-                      ┌────────────────────────┴────────────────────────┐  
-                      ▼                                                 ▼  
-        \[ Lectura 1: Exactamente 2 \]                       \[ Lectura 2: Al menos 2 \]  
-    • Activación exclusiva en m(3, 5, 6\)               • Activación inclusiva en m(3, 5, 6, 7\)  
-    • F(1,1,1) \= 0 (Sirena apagada)                    • F(1,1,1) \= 1 (Sirena encendida)  
-    • Inadecuado para seguridad                        • Criterio real de ingeniería
+### 1.3 Vocabulario
 
-* **Lectura 1 (Exactamente dos sensores activos):**  Limita la activación de la función exclusivamente a las combinaciones donde dos entradas equivalen a  \$1\$ . Las filas correspondientes a esta condición son  \$F \= \\Sigma m(3, 5, 6)\$ . Bajo esta premisa, si coinciden tres sensores activos ( \$111\$ , minitérmino  \$m\_7\$ ), la salida evalúa en  \$0\$ . En sistemas de detección de incendios o intrusión, apagar la alarma ante la activación total de los sensores constituye una falla de diseño inadmisible.  
-* **Lectura 2 (Al menos dos sensores activos):**  Define la condición de activación como la presencia de dos o más señales en nivel alto. Las filas asociadas son  \$F \= \\Sigma m(3, 5, 6, 7)\$ . Esta interpretación cumple con los requerimientos técnicos reales exigidos en entornos de seguridad industrial.
+| Término | Definición | Ejemplo |
+|---|---|---|
+| **Literal** | Una variable, complementada o no | $A$, $B'$ |
+| **Término producto** | Literales unidos por AND | $AB'C$ |
+| **Término suma** | Literales unidos por OR | $A + B' + C$ |
 
-###### *3.2 Criterios de Diseño Eléctrico y Selección de Sensores (Caso Cisterna, Tanque y Control Manual)*
+Para medir la complejidad de una expresión se cuentan **términos** y **literales**; menos literales significa menos entradas de compuertas.
 
-En la automatización de procesos hidráulicos, la polarización lógica de los transductores condiciona la tabla de verdad. Considere un sistema de bombeo dependiente de tres variables de entrada:
+---
 
-* \$A\$ : Estado del Tanque Alto ( \$1 \\rightarrow\$  nivel bajo, requiere llenado de agua;  \$0 \\rightarrow\$  nivel lleno).  
-* \$B\$ : Estado de la Cisterna ( \$1 \\rightarrow\$  cisterna con agua / llena;  \$0 \\rightarrow\$  cisterna vacía / sin agua).  
-* \$C\$ : Comando de activación Manual ( \$1 \\rightarrow\$  encendido manual solicitado;  \$0 \\rightarrow\$  inactivo).
+## 2. Postulados, teoremas y dualidad
 
-La función lógica de bombeo  \$F \= B(A+C)\$  gobierna la bomba. A continuación se presenta la tabla de verdad estructurada formalmente con los vectores de entrada, los términos intermedios y las salidas asignadas:  
-\$A\$,\$B\$,\$C\$,\$A+C\$,\$F\$,Término Asignado  
-0,0,0,0,0,\$M\_0\$  
-0,0,1,1,0,\$M\_1\$  
-0,1,0,0,0,\$M\_2\$  
-0,1,1,1,1,\$m\_3\$  
-1,0,0,1,0,\$M\_4\$  
-1,0,1,1,0,\$M\_5\$  
-1,1,0,1,1,\$m\_6\$  
-1,1,1,1,1,\$m\_7\$
+### 2.1 Postulados de Huntington
 
-###### *Análisis de Ingeniería Digital de Sistemas de Control*
+Son los axiomas de partida, aceptados sin demostración. Cada uno tiene una forma OR y una forma AND (dual):
 
-Al examinar la fila  \$m\_3\$  ( \$A=0, B=1, C=1 \\implies F=1\$ ), la tabla indica que la bomba se enciende debido a la orden manual ( \$C=1\$ ) sumada a la disponibilidad efectiva de agua en la cisterna ( \$B=1\$ ), aun cuando el tanque alto no requiere suministro ( \$A=0\$ ). El diseñador de hardware debe evaluar si este comportamiento es deseable para la aplicación (por ejemplo, para pruebas de mantenimiento) o si requiere bloqueos lógicos adicionales que prevengan sobrellenados en el depósito superior.  
-La estructuración rigurosa de las tablas de verdad permite dar el paso fundamental hacia la formalización algebraica normalizada mediante formas canónicas.
+| Postulado | Forma OR | Forma AND |
+|---|---|---|
+| Identidad | $X + 0 = X$ | $X \cdot 1 = X$ |
+| Complemento | $X + X' = 1$ | $X \cdot X' = 0$ |
+| Conmutativa | $X + Y = Y + X$ | $XY = YX$ |
+| Distributiva | $X(Y+Z) = XY + XZ$ | $X + YZ = (X+Y)(X+Z)$ |
 
-##### 4\. FORMAS CANÓNICAS: SUMA DE PRODUCTOS (SOP) Y PRODUCTO DE SUMAS (POS)
+> **Diferencia con el álgebra convencional:** la distributiva de la suma sobre el producto, $X + YZ = (X+Y)(X+Z)$, **también es válida** aquí. Además no existen la resta ni la división.
 
-Las formas canónicas son las representaciones algebraicas estandarizadas y unívocas de una función booleana extraída de una tabla de verdad. Permiten expresar la misma lógica mediante dos visiones duales: la caracterización del espacio de estados donde la salida se activa ( \$F=1\$ ), o el mapeo de las condiciones de inactividad ( \$F=0\$ ).
+### 2.2 Teoremas derivados
 
-###### *4.1 Definición Matemática de Minitérminos ( \$m\_i\$ ) y Maxitérminos ( \$M\_i\$ )*
+Se demuestran a partir de los postulados:
 
-* **Minitérmino (**  **\$m\_i**\$  **):**  Término de producto lógico ( \$\\text{AND}\$ ) que contiene las  \$n\$  variables de la función. Una variable se incluye en su forma directa (sin complementar) si en la fila de evaluación toma el valor  \$1\$ , y en su forma complementada si toma el valor  \$0\$ . Un minitérmino evalúa en  \$1\$  únicamente para el índice decimal asignado a dicha fila.  
-* **Maxitérmino (**  **\$M\_i**\$  **):**  Término de suma lógica ( \$\\text{OR}\$ ) que abarca las  \$n\$  variables del dominio. Una variable aparece en su forma directa (sin complementar) si en la fila toma el valor  \$0\$ , y complementada si toma el valor  \$1\$ . Un maxitérmino evalúa en  \$0\$  exclusivamente para el índice de su combinación.
+| Teorema | Forma OR | Forma AND |
+|---|---|---|
+| Elemento nulo | $X + 1 = 1$ | $X \cdot 0 = 0$ |
+| Idempotencia | $X + X = X$ | $X \cdot X = X$ |
+| Involución | $(X')' = X$ | — |
+| Absorción | $X + XY = X$ | $X(X + Y) = X$ |
+| Absorción del complemento | $X + X'Y = X + Y$ | $X(X' + Y) = XY$ |
+| Adyacencia (combinación) | $XY + XY' = X$ | $(X+Y)(X+Y') = X$ |
+| Consenso | $XY + X'Z + YZ = XY + X'Z$ | $(X+Y)(X'+Z)(Y+Z) = (X+Y)(X'+Z)$ |
+| Asociativa | $X + (Y+Z) = (X+Y) + Z$ | $X(YZ) = (XY)Z$ |
 
-Ambas representaciones cumplen la relación de complementariedad dual  \$M\_i \= (m\_i)'\$ .  
-Para un dominio de 3 variables ( \$A, B, C\$ ), los 8 estados canónicos posibles se parametrizan en la siguiente tabla:  
-Subíndice ( \$i\$ ),Valores ( \$A\\ B\\ C\$ ),Minitérmino equivalente ( \$m\_i\$ ),Maxitérmino equivalente ( \$M\_i\$ )  
-0,0 0 0,\$A'B'C'\$,\$A \+ B \+ C\$  
-1,0 0 1,\$A'B'C\$,\$A \+ B \+ C'\$  
-2,0 1 0,\$A'BC'\$,\$A \+ B' \+ C\$  
-3,0 1 1,\$A'BC\$,\$A \+ B' \+ C'\$  
-4,1 0 0,\$AB'C'\$,\$A' \+ B \+ C\$  
-5,1 0 1,\$AB'C\$,\$A' \+ B \+ C'\$  
-6,1 1 0,\$ABC'\$,\$A' \+ B' \+ C\$  
-7,1 1 1,\$ABC\$,\$A' \+ B' \+ C'\$
+### 2.3 Principio de dualidad
 
-###### *4.2 Suma de Productos (SOP /  \$\\Sigma m\$ ): Enfoque en Estados Activos ( \$F=1\$ )*
+Toda identidad booleana sigue siendo válida si se **intercambian simultáneamente** $+ \leftrightarrow \cdot$ y $0 \leftrightarrow 1$, **sin complementar las variables**. Por eso cada identidad de las tablas anteriores aparece en dos formas.
 
-La regla para construir la forma canónica  \$\\text{SOP}\$  requiere seleccionar únicamente las filas de la tabla de verdad donde la función evalúa en  \$F \= 1\$ . Se extrae el minitérmino ( \$m\_i\$ ) de cada fila activa y se enlazan todos los términos mediante el operador de suma lógica ( \$\\text{OR}\$ ).  
-Tomando como referencia la función de la sirena de seguridad bajo la especificación de al menos dos sensores ( \$F \= 1\$  en las filas 3, 5, 6 y 7), la sumatoria reducida y su despliegue canónico se expresan como:  
-\$\$F \= \\Sigma m(3, 5, 6, 7)\$\$  
-\$\$F \= A'BC \+ AB'C \+ ABC' \+ ABC\$\$
+**Ejemplo:** el dual de $X + X'Y = X + Y$ es $X(X' + Y) = XY$.
 
-###### *4.3 Producto de Sumas (POS /  \$\\Pi M\$ ): Enfoque en Estados Inactivos ( \$F=0\$ )*
+### 2.4 Demostraciones
 
-La construcción de la forma canónica  \$\\text{POS}\$  consiste en registrar las filas donde la función evalúa en  \$F \= 0\$ . Por cada fila inactiva, se toma el maxitérmino ( \$M\_i\$ ) correspondiente y se combinan mediante el operador de producto lógico ( \$\\text{AND}\$ ).  
-Para la función de la sirena, las condiciones inactivas se presentan en los índices 0, 1, 2 y 4\. Su representación productoria reducida y despliegue canónico corresponden a:  
-\$\$F \= \\Pi M(0, 1, 2, 4)\$\$  
-\$\$F \= (A \+ B \+ C)(A \+ B \+ C')(A \+ B' \+ C)(A' \+ B \+ C)\$\$
+Hay dos métodos: **algebraico** (con postulados y teoremas) y por **inducción perfecta** (comprobar con una tabla de verdad todas las combinaciones).
 
-###### *Demostración de Complementariedad de Índices*
+**a) Distributiva de la suma sobre el producto: $A + BC = (A+B)(A+C)$**
 
-En una función booleana de  \$n\$  variables, el espacio de estados  \$2^n\$  se compone de la unión disjunta de los índices de minitérminos y maxitérminos. Para  \$n=3\$ , el conjunto universo de índices es  \$U \= \\{0, 1, 2, 3, 4, 5, 6, 7\\}\$ . Los subíndices de la forma productoria  \$\\Pi M\$  corresponden al complemento del conjunto de minitérminos  \$\\Sigma m\$ :  
-\$\$\\text{Si } \\text{SOP} \= \\{3, 5, 6, 7\\} \\implies \\text{POS} \= U \\setminus \\text{SOP} \= \\{0, 1, 2, 4\\}\$\$  
-La obtención de estas expresiones canónicas representa una formulación completa del sistema lógico; sin embargo, implementarlas directamente resultaría en esquemas de hardware sobredimensionados, exigiendo procesos de simplificación algebraica.
+Se parte del miembro derecho:
 
-##### 5\. MÉTODOS DE SIMPLIFICACIÓN ALGEBRAICA Y CASOS PRÁCTICOS DE APLICACIÓN
+$$
+\begin{aligned}
+(A+B)(A+C) &= AA + AC + AB + BC && \text{(distributiva)} \\
+&= A + AC + AB + BC && \text{(idempotencia: } AA = A\text{)} \\
+&= A(1 + C + B) + BC && \text{(factorizando } A\text{)} \\
+&= A \cdot 1 + BC && \text{(elemento nulo: } 1 + C + B = 1\text{)} \\
+&= A + BC && \text{(identidad)} \quad \blacksquare
+\end{aligned}
+$$
 
-La minimización de expresiones booleanas constituye una fase fundamental en la arquitectura de hardware digital. Las formas canónicas puras suelen incluir redundancia operacional. Aplicar rigurosamente los postulados y teoremas permite reducir el número de términos y literales de la función, reduciendo el consumo de compuertas lógicas integradas, disminuyendo el costo del encapsulado del circuito impreso y optimizando la velocidad de propagación física de las señales.
+**b) Absorción del complemento: $X + X'Y = X + Y$**
 
-###### *5.1 Procedimiento de Minimización Paso a Paso*
+$$
+\begin{aligned}
+X + X'Y &= (X + X')(X + Y) && \text{(distributiva de la suma sobre el producto)} \\
+&= 1 \cdot (X + Y) && \text{(complemento)} \\
+&= X + Y && \text{(identidad)} \quad \blacksquare
+\end{aligned}
+$$
 
-A continuación se desarrolla en detalle el proceso de reducción algebraica para la función lógica:  
-\$\$F \= A \+ A'B \+ AB'C\$\$
+**c) Consenso: $XY + X'Z + YZ = XY + X'Z$**
 
-1. **Aplicación del Teorema de Absorción del Complemento:**  Evaluando la interacción entre los dos primeros términos ( \$A \+ A'B\$ ), la identidad de absorción del complemento ( \$X \+ X'Y \= X \+ Y\$ ) reduce la subexpresión a  \$(A \+ B)\$ :  \$\$F \= (A \+ B) \+ AB'C \\quad \\text{Por Absorción del Complemento: } A \+ A'B \= A \+ B \\text{}\$\$  
-2. **Reordenamiento por Propiedad Conmutativa:**  Se reordenan los sumando para agrupar las variables con el literal  \$A\$ :  \$\$F \= A \+ AB'C \+ B \\quad \\text{Por Propiedad Conmutativa}\$\$  
-3. **Aplicación del Teorema de Absorción Estándar:**  Analizando el bloque  \$A \+ A(B'C)\$  bajo la regla  \$X \+ XY \= X\$  (tomando  \$Y \= B'C\$ ), el término  \$AB'C\$  es absorbido por  \$A\$ :  \$\$F \= A \+ B \\quad \\text{Por Teorema de Absorción: } A \+ A(B'C) \= A \\text{} \\quad \\blacksquare\$\$
+$$
+\begin{aligned}
+XY + X'Z + YZ &= XY + X'Z + YZ(X + X') \\
+&= XY + X'Z + XYZ + X'YZ \\
+&= XY(1 + Z) + X'Z(1 + Y) \\
+&= XY + X'Z \quad \blacksquare
+\end{aligned}
+$$
 
-###### *Evaluación del Impacto Técnico en Hardware*
+### 2.5 Leyes de De Morgan
 
-La transformación efectuada demuestra la importancia de la minimización lógica previa al diseño físico:  
-    Expresión Canónica / Compleja                       Expresión Optimizada  
-    • 3 Términos / 5 Literales                          • 1 Término / 2 Literales  
-    • Requiere: NOT, ANDs de múltiples entradas u OR    • Requiere: 1 Compuerta OR de 2 entradas
+Permiten complementar una expresión compuesta. Regla práctica: **se rompe la barra y se cambia el operador**.
 
-El proceso simplifica un circuito redundante de tres términos y cinco literales a una única compuerta  \$\\text{OR}\$  de dos entradas, eliminando etapas de retardo y optimizando el espacio en silicio.
+$$(A \cdot B \cdot C)' = A' + B' + C' \qquad\qquad (A + B + C)' = A' \cdot B' \cdot C'$$
 
-###### *5.2 Síntesis de Casos Prácticos y Talleres de Aplicación*
+**Verificación por inducción perfecta (2 variables):**
 
-###### *Taller 1: Alarma de Seguridad de Vehículo (Sistema Motor/Cinturón/Puerta)*
+| $A$ | $B$ | $(AB)'$ | $A' + B'$ | $(A+B)'$ | $A'B'$ |
+|---|---|---|---|---|---|
+| 0 | 0 | 1 | 1 | 1 | 1 |
+| 0 | 1 | 1 | 1 | 0 | 0 |
+| 1 | 0 | 1 | 1 | 0 | 0 |
+| 1 | 1 | 0 | 0 | 0 | 0 |
 
-Para el circuito de alerta en el tablero de un automóvil, las variables discretas de entrada se definen como:
+**Ejemplo de uso:** complementar $F = A + BC'$:
 
-* \$A\$ : Estado del Motor ( \$1 \\rightarrow\$  encendido).  
-* \$B\$ : Estado del Cinturón de Seguridad ( \$0 \\rightarrow\$  no abrochado;  \$1 \\rightarrow\$  abrochado).  
-* \$C\$ : Estado de la Puerta del Conductor ( \$1 \\rightarrow\$  abierta).
+$$F' = A' \cdot (BC')' = A'(B' + C)$$
 
-La especificación establece que la alarma debe sonar ( \$F=1\$ ) si el motor está encendido ( \$A=1\$ )  **Y**  el cinturón no está abrochado ( \$B=0\$ ),  **O**  si la puerta se encuentra abierta ( \$C=1\$ ).  
-La función algebraica traduce el requerimiento a la siguiente expresión lógica:  
-\$\$\\text{Alarma} \= A \\cdot B' \+ C\$\$
+Consecuencia a nivel de compuertas: una AND con salida negada equivale a una OR con las entradas negadas (y viceversa), lo que permite reescribir una expresión con distintos tipos de compuertas.
 
-###### *Taller 2: Sistema de Luz de Pasillo con Interruptor Maestro*
+---
 
-En el diseño del control de iluminación para una zona de paso, se parametrizan los siguientes conmutadores:
+## 3. De enunciado verbal a tabla de verdad
 
-* \$A, B\$ : Conmutadores situados en los extremos del pasillo (cuya conmutación de estado sigue un comportamiento XOR).  
-* \$M\$ : Interruptor maestro de control.
+Pasar de una especificación a un circuito sigue estos pasos:
 
-La especificación exige que cuando el interruptor maestro esté activo ( \$M=1\$ ), la luz debe permanecer apagada de forma prioritaria e incondicional, deshabilitando la acción de los conmutadores  \$A\$  y  \$B\$ . La función lógica resultante se modela multiplicando la condición del pasillo por el complemento del maestro ( \$M'\$ ):  
-\$\$\\text{Luz} \= (A \\oplus B) \\cdot M'\$\$  
-La aplicación de las reglas algebraicas simplificadoras constituye el paso previo y obligatorio para optimizar redes combinacionales complejas. Este dominio de la simplificación por postulados provee la fundamentación analítica requerida antes de abordar técnicas de optimización visual avanzadas, tales como los Mapas de Karnaugh.  
+1. **Definir las variables** y qué significa un `1` y un `0` en cada una.
+2. **Construir la tabla de verdad** con las $2^n$ combinaciones de entrada, en orden binario.
+3. **Asignar la salida** de cada fila según el enunciado.
+4. **Escribir la forma canónica** (sección 4).
+5. **Simplificar** (sección 5) y dibujar el circuito.
+
+Un error de interpretación en el paso 3 produce un circuito que no cumple lo pedido.
+
+### 3.1 Ambigüedad en el lenguaje natural: la sirena
+
+> *"La sirena suena cuando se activan dos sensores."* (tres sensores: $A$, $B$, $C$)
+
+El enunciado admite dos lecturas distintas:
+
+| Lectura | Condición | Filas con $F=1$ | $F(1,1,1)$ |
+|---|---|---|---|
+| **Exactamente dos** | Solo suena con dos activos | $\Sigma m(3, 5, 6)$ | 0 (sirena apagada) |
+| **Al menos dos** | Suena con dos o más activos | $\Sigma m(3, 5, 6, 7)$ | 1 (sirena encendida) |
+
+Con la primera lectura la sirena se apagaría si los tres sensores se activan, algo inadmisible en un sistema de seguridad. Para alarmas de incendio o intrusión corresponde la lectura **"al menos dos"**, y es la que se usa en lo que sigue.
+
+| $A$ | $B$ | $C$ | $F$ (al menos dos) | Fila |
+|---|---|---|---|---|
+| 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 0 | 1 |
+| 0 | 1 | 0 | 0 | 2 |
+| 0 | 1 | 1 | **1** | 3 |
+| 1 | 0 | 0 | 0 | 4 |
+| 1 | 0 | 1 | **1** | 5 |
+| 1 | 1 | 0 | **1** | 6 |
+| 1 | 1 | 1 | **1** | 7 |
+
+### 3.2 Convención de los sensores: bomba de la cisterna
+
+Un sistema de bombeo usa tres entradas:
+
+- $A$: tanque alto. $1$ = nivel bajo (necesita agua), $0$ = lleno.
+- $B$: cisterna. $1$ = tiene agua, $0$ = vacía.
+- $C$: mando manual. $1$ = encendido solicitado.
+
+**Especificación:** la bomba se enciende cuando **hay agua en la cisterna Y (el tanque necesita agua O hay orden manual)**, es decir:
+
+$$F = B\,(A + C)$$
+
+| $A$ | $B$ | $C$ | $A + C$ | $F$ | Fila |
+|---|---|---|---|---|---|
+| 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 1 | 0 | 1 |
+| 0 | 1 | 0 | 0 | 0 | 2 |
+| 0 | 1 | 1 | 1 | **1** | 3 |
+| 1 | 0 | 0 | 1 | 0 | 4 |
+| 1 | 0 | 1 | 1 | 0 | 5 |
+| 1 | 1 | 0 | 1 | **1** | 6 |
+| 1 | 1 | 1 | 1 | **1** | 7 |
+
+Dos observaciones de diseño:
+
+- **El significado lógico depende de la polaridad del sensor.** Si el sensor del tanque entregara `1` cuando está **lleno** (en lugar de cuando está vacío), la variable significaría lo contrario y la función pasaría a ser $F = B(A' + C)$. Hay que fijar la convención antes de armar la tabla.
+- **Revisión funcional.** La fila 3 ($A=0$, $B=1$, $C=1$) enciende la bomba por mando manual aunque el tanque no necesite agua. La tabla lo especifica así; el diseñador debe decidir si es aceptable (por ejemplo, para mantenimiento) o si se necesita un bloqueo contra desbordes.
+
+---
+
+## 4. Formas canónicas: SOP y POS
+
+Una **forma canónica** es la expresión estándar y única que se obtiene de una tabla de verdad, donde **cada término contiene todas las variables**. Hay dos formas duales: una describe cuándo la salida vale $1$ y la otra cuándo vale $0$.
+
+### 4.1 Minitérminos y maxitérminos
+
+- **Minitérmino $m_i$:** producto (AND) de las $n$ variables. Cada variable aparece **directa si vale 1** en esa fila y **complementada si vale 0**. Vale $1$ solo en su fila.
+- **Maxitérmino $M_i$:** suma (OR) de las $n$ variables. Cada variable aparece **directa si vale 0** y **complementada si vale 1**. Vale $0$ solo en su fila.
+
+Se cumple que $M_i = (m_i)'$.
+
+| $i$ | $A\,B\,C$ | Minitérmino $m_i$ | Maxitérmino $M_i$ |
+|---|---|---|---|
+| 0 | 0 0 0 | $A'B'C'$ | $A + B + C$ |
+| 1 | 0 0 1 | $A'B'C$ | $A + B + C'$ |
+| 2 | 0 1 0 | $A'BC'$ | $A + B' + C$ |
+| 3 | 0 1 1 | $A'BC$ | $A + B' + C'$ |
+| 4 | 1 0 0 | $AB'C'$ | $A' + B + C$ |
+| 5 | 1 0 1 | $AB'C$ | $A' + B + C'$ |
+| 6 | 1 1 0 | $ABC'$ | $A' + B' + C$ |
+| 7 | 1 1 1 | $ABC$ | $A' + B' + C'$ |
+
+> **Regla mnemotécnica:** en el minitérmino un `1` se escribe como $A$ y un `0` como $A'$; en el maxitérmino es al revés.
+
+### 4.2 Suma de productos (SOP, $\Sigma m$)
+
+Se toman las filas con $F = 1$, se escribe su minitérmino y se unen con **OR**.
+
+Para la sirena ("al menos dos"), $F=1$ en las filas 3, 5, 6 y 7:
+
+$$F = \Sigma m(3, 5, 6, 7) = A'BC + AB'C + ABC' + ABC$$
+
+### 4.3 Producto de sumas (POS, $\Pi M$)
+
+Se toman las filas con $F = 0$, se escribe su maxitérmino y se unen con **AND**.
+
+Para la sirena, $F=0$ en las filas 0, 1, 2 y 4:
+
+$$F = \Pi M(0, 1, 2, 4) = (A+B+C)(A+B+C')(A+B'+C)(A'+B+C)$$
+
+### 4.4 Relación entre ambas formas
+
+Las dos describen la **misma función**. Los índices del POS son el **complemento** de los del SOP dentro del universo $U = \{0, 1, \dots, 2^n - 1\}$:
+
+$$\Sigma m(3,5,6,7) \;\Longleftrightarrow\; \Pi M(0,1,2,4) \qquad\text{pues}\quad U \setminus \{3,5,6,7\} = \{0,1,2,4\}$$
+
+Además, nº de minitérminos + nº de maxitérminos $= 2^n$.
+
+**Para la bomba de la cisterna:** $F = \Sigma m(3, 6, 7) = \Pi M(0, 1, 2, 4, 5)$.
+
+**¿Cuál usar?** Conviene el SOP cuando hay **pocos unos** y el POS cuando hay **pocos ceros** en la tabla, porque se escriben menos términos.
+
+Las formas canónicas son completas pero poco eficientes: cada término lleva todas las variables. Implementarlas directamente exigiría más compuertas de las necesarias.
+
+---
+
+## 5. Simplificación algebraica
+
+Aplicar los postulados y teoremas reduce términos y literales. Esto significa menos compuertas, menos entradas, menos área, menos consumo y menor retardo de propagación.
+
+### 5.1 Ejemplo guiado
+
+Simplificar $F = A + A'B + AB'C$.
+
+| Paso | Expresión | Justificación |
+|---|---|---|
+| 0 | $A + A'B + AB'C$ | Punto de partida |
+| 1 | $(A + B) + AB'C$ | Absorción del complemento: $A + A'B = A + B$ |
+| 2 | $A + AB'C + B$ | Conmutativa (reordenar) |
+| 3 | $A + B$ | Absorción: $A + A(B'C) = A$ |
+
+$$F = A + B$$
+
+| | Original | Simplificada |
+|---|---|---|
+| Términos | 3 | 2 |
+| Literales | 6 | 2 |
+| Circuito | NOT + 2 AND + OR (con una AND de 3 entradas) | 1 OR de 2 entradas |
+
+### 5.2 De la forma canónica a la mínima
+
+**Bomba de la cisterna: $F = \Sigma m(3, 6, 7)$**
+
+Se duplica $m_7$ (idempotencia) para combinarlo con sus dos vecinos:
+
+$$
+\begin{aligned}
+F &= A'BC + ABC' + ABC \\
+  &= (A'BC + ABC) + (ABC' + ABC) && (X + X = X) \\
+  &= BC(A' + A) + AB(C' + C) && \text{(factor común)} \\
+  &= BC + AB && (X + X' = 1,\; X \cdot 1 = X) \\
+  &= B(A + C) && \text{(factor común } B\text{)}
+\end{aligned}
+$$
+
+Así se recupera la función de partida, ahora con una OR y una AND.
+
+**Sirena (al menos dos): $F = \Sigma m(3, 5, 6, 7)$**
+
+Se usa $m_7$ tres veces:
+
+$$
+\begin{aligned}
+F &= A'BC + AB'C + ABC' + ABC + ABC + ABC \\
+  &= BC(A' + A) + AC(B' + B) + AB(C' + C) \\
+  &= BC + AC + AB
+\end{aligned}
+$$
+
+Es la función "mayoría": la salida es `1` cuando la mayoría de las entradas valen `1`.
+
+> **Idea clave:** al combinar dos minitérminos que difieren en una sola variable (teorema de adyacencia, $XY + XY' = X$) esa variable desaparece.
+
+### 5.3 Casos de aplicación
+
+#### Alarma de seguridad de un automóvil
+
+Variables: $A$ = motor encendido (1), $B$ = cinturón abrochado (1) y $C$ = puerta del conductor abierta (1).
+
+**Especificación:** la alarma suena si el **motor está encendido Y el cinturón NO está abrochado**, **O** si la **puerta está abierta**.
+
+$$\text{Alarma} = A \cdot B' + C$$
+
+Tabla de verdad y formas canónicas:
+
+| $A$ | $B$ | $C$ | $F$ | Fila |
+|---|---|---|---|---|
+| 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | **1** | 1 |
+| 0 | 1 | 0 | 0 | 2 |
+| 0 | 1 | 1 | **1** | 3 |
+| 1 | 0 | 0 | **1** | 4 |
+| 1 | 0 | 1 | **1** | 5 |
+| 1 | 1 | 0 | 0 | 6 |
+| 1 | 1 | 1 | **1** | 7 |
+
+$$F = \Sigma m(1, 3, 4, 5, 7) = \Pi M(0, 2, 6)$$
+
+Aquí el POS tiene menos términos que el SOP (3 frente a 5).
+
+Simplificación desde el SOP: las filas 1, 3, 5 y 7 son todas las que tienen $C=1$, así que valen $C$. Queda el minitérmino $m_4 = AB'C'$:
+
+$$F = C + AB'C' = C + AB' \qquad \text{(absorción del complemento: } X + X'Y = X + Y\text{)}$$
+
+Coincide con la expresión original.
+
+#### Luz de pasillo con interruptor maestro
+
+Variables: $A$ y $B$ son los interruptores de los extremos (la lámpara cambia de estado al accionar cualquiera, comportamiento XOR) y $M$ es el interruptor maestro.
+
+**Especificación:** si $M = 1$ la luz permanece **apagada**, sin importar $A$ y $B$. Si $M = 0$, la luz sigue a $A \oplus B$.
+
+$$\text{Luz} = (A \oplus B) \cdot M'$$
+
+| $A$ | $B$ | $M$ | Luz | Fila |
+|---|---|---|---|---|
+| 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 0 | 1 |
+| 0 | 1 | 0 | **1** | 2 |
+| 0 | 1 | 1 | 0 | 3 |
+| 1 | 0 | 0 | **1** | 4 |
+| 1 | 0 | 1 | 0 | 5 |
+| 1 | 1 | 0 | 0 | 6 |
+| 1 | 1 | 1 | 0 | 7 |
+
+$$\text{Luz} = \Sigma m(2, 4) = A'BM' + AB'M' \qquad \Pi M(0,1,3,5,6,7)$$
+
+Como $A \oplus B = A'B + AB'$, al multiplicar por $M'$ se obtiene exactamente el SOP canónico. Aquí el SOP es mucho más corto que el POS (2 términos frente a 6).
+
+---
+
+## Resumen de la semana
+
+1. El **álgebra de Boole** modela los circuitos: variables = cables, producto = AND, suma = OR, complemento = NOT. La precedencia es paréntesis, NOT, AND y OR.
+2. Los **postulados de Huntington** (identidad, complemento, conmutativa, distributiva) son la base; de ellos salen los teoremas (nulo, idempotencia, involución, absorción, adyacencia, consenso). El **principio de dualidad** duplica cada identidad.
+3. Las **leyes de De Morgan** complementan expresiones: se rompe la barra y se cambia el operador.
+4. Antes de construir la tabla de verdad hay que **eliminar ambigüedades** y fijar la **polaridad** de cada variable (caso de la sirena y de la cisterna).
+5. **SOP** $= \Sigma m$ (filas con $F=1$, términos AND unidos con OR) y **POS** $= \Pi M$ (filas con $F=0$, términos OR unidos con AND). Sus índices son complementarios.
+6. La **simplificación algebraica** (adyacencia, absorción, idempotencia) reduce términos y literales y, con ello, compuertas.
+
+---
+
+## Autoevaluación
+
+1. Demuestre con una tabla de verdad que $X + X'Y = X + Y$.
+2. Escriba como $\Pi M$ la función $F = \Sigma m(1, 2, 5, 6, 7)$ de 3 variables.
+3. Simplifique $F = AB + AB' + A'B$.
+4. Obtenga el complemento de $F = A + BC'$ y de $F = A'B + AB'$ usando De Morgan.
+5. Escriba el dual de $X(Y + Z) = XY + XZ$.
+6. Plantee la tabla de verdad y la expresión SOP de una función que vale $1$ cuando **exactamente una** de tres entradas vale $1$.
+
+<details>
+<summary>Ver respuestas</summary>
+
+1. | $X$ | $Y$ | $X'Y$ | $X + X'Y$ | $X + Y$ |
+   |---|---|---|---|---|
+   | 0 | 0 | 0 | 0 | 0 |
+   | 0 | 1 | 1 | 1 | 1 |
+   | 1 | 0 | 0 | 1 | 1 |
+   | 1 | 1 | 0 | 1 | 1 |
+
+   Las dos últimas columnas coinciden en todas las filas.
+2. El universo es $\{0,\dots,7\}$; los ceros están en las filas 0, 3 y 4: $F = \Pi M(0, 3, 4)$.
+3. $F = A(B + B') + A'B = A + A'B = A + B$.
+4. $(A + BC')' = A'(B' + C)$. Para el segundo: $(A'B + AB')' = (A'B)'\,(AB')' = (A + B')(A' + B)$.
+5. $X + YZ = (X + Y)(X + Z)$.
+6. $F = 1$ en las filas 1, 2 y 4: $F = \Sigma m(1,2,4) = A'B'C + A'BC' + AB'C'$.
+
+</details>
+
+---
