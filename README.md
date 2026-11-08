@@ -15,15 +15,7 @@
 ### Unidad 1: Análisis de Lógica Combinacional con Diseño Clásico
 *Semanas 1 a 5*
 
-<br>
 
-![Asignatura](https://img.shields.io/badge/Asignatura-Dise%C3%B1o%20de%20Circuitos-1f6feb?style=for-the-badge)
-![Ciclo](https://img.shields.io/badge/Ciclo-Segundo-2ea043?style=for-the-badge)
-![Unidad](https://img.shields.io/badge/Unidad-1-d29922?style=for-the-badge)
-![Semanas](https://img.shields.io/badge/Semanas-5-8957e5?style=for-the-badge)
-![Formato](https://img.shields.io/badge/Formato-Markdown-444?style=for-the-badge&logo=markdown&logoColor=white)
-
-</div>
 
 ---
 
