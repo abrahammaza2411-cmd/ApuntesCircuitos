@@ -1,53 +1,127 @@
 <div align="center">
-  <img src="https://redi.cedia.edu.ec/members/UNL.png" width="230px" alt="UNL Logo">
-<h1>UNIVERSIDAD NACIONAL DE LOJA</h1>
-<h3>Facultad de la Energía, las Industrias y los Recursos Naturales No Renovables</h3>
-<h3><b>Carrera de Computación</b></h3>
 
----
+<img src="https://redi.cedia.edu.ec/members/UNL.png" width="200px" alt="Logo Universidad Nacional de Loja">
 
-## **REPOSICIONARIO DE APUNTES**
-### **[Unidad 1: Análisis de Lógica Combinacional con Diseño Clásico](#contenidos)**
-**(Semanas 1 - 5)**
+# UNIVERSIDAD NACIONAL DE LOJA
 
-\
-**ESTUDIANTE**  
-Abraham Maza  
+**Facultad de la Energía, las Industrias y los Recursos Naturales No Renovables**
+**Carrera de Computación**
 
-**ASIGNATURA**  
-Diseño de Circuitos  
+<br>
 
-**DOCENTE**  
-Ing. Luis Darío Sinche Cueva
+# 📘 Repositorio de Apuntes
+## Diseño de Circuitos
 
-**CICLO**  
-Segundo ciclo  
+### Unidad 1: Análisis de Lógica Combinacional con Diseño Clásico
+*Semanas 1 a 5*
 
-**CARRERA**  
-Computación  
+<br>
 
-**FECHA**  
-25 de Octubre de 2026  
+![Asignatura](https://img.shields.io/badge/Asignatura-Dise%C3%B1o%20de%20Circuitos-1f6feb?style=for-the-badge)
+![Ciclo](https://img.shields.io/badge/Ciclo-Segundo-2ea043?style=for-the-badge)
+![Unidad](https://img.shields.io/badge/Unidad-1-d29922?style=for-the-badge)
+![Semanas](https://img.shields.io/badge/Semanas-5-8957e5?style=for-the-badge)
+![Formato](https://img.shields.io/badge/Formato-Markdown-444?style=for-the-badge&logo=markdown&logoColor=white)
 
 </div>
 
 ---
 
-## INTRODUCCIÓN
+## 📋 Ficha académica
 
-El presente repositorio recopila y sintetiza los apuntes académicos, ejercicios prácticos y fundamentos teóricos abordados durante la **Unidad 1** de la asignatura **Diseño de Circuitos**, correspondiente al segundo ciclo de la Carrera de Computación de la Universidad Nacional de Loja. 
+| | |
+|---|---|
+| 👤 **Estudiante** | Abraham Maza |
+| 📚 **Asignatura** | Diseño de Circuitos |
+| 🎓 **Docente** | Ing. Luis Darío Sinche Cueva |
+| 🏫 **Carrera** | Computación |
+| 📅 **Ciclo** | Segundo ciclo |
+| 🗓️ **Fecha** | 25 de octubre de 2026 |
 
-El propósito general de esta unidad abarca el aprendizaje del hardware digital fundamental sobre el cual se ejecutan los sistemas informáticos, partiendo desde los bloques más elementales de la electrónica digital hasta la implementación de lógica combinacional mediante métodos de diseño clásico.
+---
 
-### Contenidos:
+## 📖 Introducción
 
-* **[Semana 1](semana1.md)**
+Este repositorio reúne los **apuntes académicos, ejercicios y fundamentos teóricos** de la **Unidad 1** de *Diseño de Circuitos*. La unidad recorre el hardware digital sobre el que se ejecutan los sistemas informáticos, desde los niveles de voltaje y las compuertas lógicas hasta la construcción de bloques combinacionales con métodos de **diseño clásico**.
 
-* **[Semana 2](semana2.md)**
+Los apuntes son **progresivos**: cada semana asume lo visto en las anteriores y solo explica lo nuevo, por lo que conviene leerlos **en orden**.
+
+---
+
+## 🗺️ Ruta de aprendizaje
+
+```mermaid
+flowchart LR
+    S1["<b>Semana 1</b><br/>Fundamentos<br/>digitales"] --> S2["<b>Semana 2</b><br/>Álgebra<br/>de Boole"]
+    S2 --> S3["<b>Semana 3</b><br/>Mapas de<br/>Karnaugh"]
+    S3 --> S4["<b>Semana 4</b><br/>Bloques<br/>aritméticos"]
+    S4 --> S5["<b>Semana 5</b><br/>Encaminamiento<br/>y visualización"]
+```
+
+---
+
+## 📑 Contenidos
+
+| Semana | Tema | Qué se aprende | Apunte |
+|:---:|---|---|:---:|
+| **1** | Sistemas numéricos, códigos y compuertas | Niveles lógicos y margen de ruido (74LS) · Binario, octal y hexadecimal · Complemento a dos y *overflow* · Códigos BCD, Gray y ASCII · Las 7 compuertas · Lectura del 74LS08 | [📄 Abrir](semana1.md) |
+| **2** | Álgebra de Boole y formas canónicas | Postulados de Huntington y teoremas · Dualidad y De Morgan · Tablas de verdad · Minitérminos y maxitérminos (SOP / POS) · Simplificación algebraica | [📄 Abrir](semana2.md) |
+| **3** | Mapas de Karnaugh y compuertas universales | K-Maps de 2, 3 y 4 variables · Agrupación SOP y POS · Condiciones *don't care* · Implementación con NAND y NOR | [📄 Abrir](semana3.md) |
+| **4** | Diseño combinacional y bloques aritméticos | Metodología de diseño · Medio sumador y sumador completo · Restadores · Sumador/restador · Comparadores · Práctica APE 04 | [📄 Abrir](semana4.md) |
+| **5** | Encaminamiento y visualización de datos | Multiplexores y demultiplexores · Decodificadores y codificadores · *Chip Select* · BCD a 7 segmentos · Integración de bloques | [📄 Abrir](semana5.md) |
+
+---
+
+## 🎯 Al terminar la unidad se podrá
+
+- ⚡ Explicar cómo los voltajes se abstraen en estados lógicos y calcular márgenes de ruido.
+- 🔢 Convertir entre sistemas numéricos y operar con enteros con signo en complemento a dos.
+- 🧮 Modelar circuitos con álgebra de Boole y expresar funciones en formas canónicas.
+- 🗺️ Minimizar funciones con Mapas de Karnaugh y construirlas con compuertas universales.
+- ➕ Diseñar sumadores, restadores, sumadores/restadores y comparadores.
+- 🔀 Usar multiplexores, decodificadores y codificadores, y manejar displays de 7 segmentos.
+
+---
+
+## 🛠️ Herramientas y componentes
+
+| Herramienta | Uso |
+|---|---|
+| **Logisim-evolution** | Simulación de los circuitos antes de armarlos |
+| **74LS00 · 02 · 04 · 08 · 32 · 86** | Compuertas NAND, NOR, NOT, AND, OR y XOR |
+| **74LS83 · 85** | Sumador y comparador de 4 bits |
+| **74LS138 · 139 · 148** | Decodificadores y codificador con prioridad |
+| **74LS151 · 153 · 157** | Multiplexores |
+| **74LS47 · 48** | Decodificadores BCD a 7 segmentos |
+
+---
+
+## 📂 Estructura del repositorio
+
+```text
+.
+├── README.md      ← Presentación e índice
+├── semana1.md     ← Sistemas numéricos, códigos y compuertas lógicas
+├── semana2.md     ← Álgebra de Boole y formas canónicas
+├── semana3.md     ← Mapas de Karnaugh y compuertas universales
+├── semana4.md     ← Diseño combinacional y bloques aritméticos
+└── semana5.md     ← Encaminamiento y visualización de datos
+```
+
+---
+
+## 🧭 Cómo leer los apuntes
+
+- 🔖 Cada archivo trae **objetivos**, **conocimientos previos**, desarrollo con tablas y diagramas, **resumen** y **autoevaluación** con respuestas desplegables.
+- 🧪 Las fórmulas están escritas en **LaTeX** (`$...$`), que GitHub muestra directamente.
 
 
-* **[Semana 3](semana3.md)**
+---
 
-* **[Semana 4](semana4.md)**
+<div align="center">
 
-* **[Semana 5](semana5.md)**
+**Abraham Maza** · Carrera de Computación · Universidad Nacional de Loja
+
+*Diseño de Circuitos · Segundo ciclo · 2026*
+
+</div>
