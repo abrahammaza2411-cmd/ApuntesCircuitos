@@ -7,8 +7,8 @@
 ---
 
 ## **REPOSICIONARIO DE APUNTES**
-### **Unidad 1: Análisis de Lógica Combinacional con Diseño Clásico**
-**[(Semanas 1 - 5)](#contenidos)**
+### **[Unidad 1: Análisis de Lógica Combinacional con Diseño Clásico](#contenidos)**
+**(Semanas 1 - 5)**
 
 \
 **ESTUDIANTE**  
